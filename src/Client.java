@@ -2,8 +2,12 @@ package src;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
+import java.util.*;
+
 
 public class Client {
+
+
 
     public static void main(String args[]) {
 
@@ -13,11 +17,14 @@ public class Client {
 		*/
 
         try {
-            ClientServer h = (ClientServer) LocateRegistry.getRegistry(7000).lookup("benfica");
+            ClientServer h = (ClientServer) LocateRegistry.getRegistry(7000).lookup("port");
 
-            String input = "url";
-            h.sayHello(input);
+            Scanner in = new Scanner(System.in);
+            String input = in.nextLine();
+
+            String recebido = h.exchangeInfo(input);
             System.out.println("Mensagem enviada: " + input);
+            System.out.println("Mensagem recebida: " + recebido);
             //FIXME: receber input do terminal
 
         } catch (Exception e) {
