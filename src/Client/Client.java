@@ -13,9 +13,10 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     }
 
     //Func RMI Callback to send info to searchModule and receive sth
-    public void ShareInfo(String s) throws RemoteException {
-        System.out.println(">> " + s);
-    }
+    //public String ShareInfoToClient(String s) throws RemoteException {
+    //    System.out.println(">> " + s);
+    //    return "";
+    //}
 
     public static void main(String args[]) {
 
@@ -35,7 +36,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
             while (true) {
                 System.out.print("> ");
                 ClientInput = reader.readLine();
-                h.ShareInfo(nome, ClientInput);
+                System.out.println(h.ShareInfoToServer(nome, ClientInput));
             }
         } catch (Exception e) {
             System.out.println("Exception in main: " + e);

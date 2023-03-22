@@ -7,16 +7,15 @@ import java.rmi.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.*;
-import java.util.Scanner;
 import java.util.*;
 import src.Client.ClientInterface;
-
+import src.StorageBarrels.BarrelsInterface;
 
 //url       mete url
 //admin     consola administrador
 //pesquisa  pesquisa de palavras
 
-public class SearchModule extends UnicastRemoteObject implements ServerInterface {
+public class SearchModule extends UnicastRemoteObject implements ServerInterface{
 
     private static int serversocket = 6000;
 
@@ -24,40 +23,29 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
 
     static ArrayList<ClientInterface> client = new ArrayList<>();
     static ArrayList<String> nomes = new ArrayList<>();
-
+    static ArrayList<BarrelsInterface> barrels = new ArrayList<>();
+    static ArrayList<String> nomes_barrels = new ArrayList<>();
 
     public SearchModule() throws RemoteException {
         super();
     }
 
-    public void ShareInfo(String name, String s) throws RemoteException {
-        System.out.println("> " + s);
+    public void subscribe_barrel(String name, BarrelsInterface b) throws RemoteException {
+        System.out.println("Barrel Subscribing " + name);
+        System.out.print("> ");
+        barrels.add(b);
+        nomes_barrels.add(name);
+    }
 
+    public String ShareInfoToServer(String name, String s) throws RemoteException {
+        String message = "";
         String[] str= s.split(" ");
         if (str[0].equals("index")){
-            // 1o passo - criar socket
+
             try (Socket socket = new Socket("localhost", serversocket)) {
-                //System.out.println("SOCKET=" + s);
 
-                // 2o passo
-                //DataInputStream in = new DataInputStream(socket.getInputStream());
                 DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-
-                // 3o passo
-                //try (Scanner sc = new Scanner(System.in)) {
-                    //while (true) {
-
-                    // WRITE INTO THE SOCKET
-                    out.writeUTF(str[1]);
-
-                    // READ FROM SOCKET
-                    //String data = in.readUTF();
-
-                    // DISPLAY WHAT WAS READ
-                    //System.out.println("Received: " + data);
-                    //}
-                    socket.close();
-                //}
+                out.writeUTF(str[1]);
 
             } catch (UnknownHostException e) {
                 System.out.println("Sock:" + e.getMessage());
@@ -66,24 +54,23 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
             } catch (IOException e) {
                 System.out.println("IO:" + e.getMessage());
             }
+            //System.out.println("Client send: " + str[1]);
+
+            message = "link indexado!";
+
+        }else{
+            message = barrels.get(0).ShareInfoToBarrel("");
         }
 
 
-
-        for (int i = 0; i < client.size(); i++) {
-            if(!nomes.get(i).equalsIgnoreCase(name)){
-                client.get(i).ShareInfo(name + ": " + s);
-            }
-        }
-
+        return message;
     }
 
     public void subscribe(String name, ClientInterface c) throws RemoteException {
-        System.out.println("Subscribing " + name);
+        System.out.println("Client Subscribing " + name);
         System.out.print("> ");
         client.add(c);
         nomes.add(name);
-        //client = c;
     }
 
     // =======================================================
@@ -104,15 +91,15 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
             Registry r = LocateRegistry.createRegistry(7000);
             r.rebind("XPTO", h);
 
+            Registry sto = LocateRegistry.createRegistry(8000);
+            sto.rebind("BARREL", h);
+
 
             System.out.println("Hello Server ready.");
             while (true) {
                 System.out.print("> ");
                 a = reader.readLine();
-                //client.ShareInfo(a);
-                //for (ClientInterface c: client) {
-                //    c.ShareInfo(a);
-                //}
+
             }
         } catch (Exception re) {
             System.out.println("Exception in HelloImpl.main: " + re);
