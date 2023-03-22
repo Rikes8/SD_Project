@@ -3,18 +3,20 @@ package src.Queue;
 
 import java.net.*;
 import java.io.*;
+import java.util.SimpleTimeZone;
+import java.util.StringTokenizer;
 import java.util.concurrent.*;
 
 public class Queue {
     private static int serverPort = 6000;
 
     //LinkedBlockingQueue does not need size
-    public static LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<>();
+    public static LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<>();;
+
+
 
     public static void main(String args[]){
-
         int numero=0;
-
         try (ServerSocket listenSocket = new ServerSocket(serverPort)) {
             //System.out.println("A escuta no porto 6000");
             System.out.println("LISTEN SOCKET=" + listenSocket);
@@ -57,9 +59,22 @@ class Connection extends Thread {
             //while(true){
             //an echo server
             String data = in.readUTF();
-            System.out.println("T[" + thread_number + "] Recebeu: "+data);
-            //out.writeUTF(data);
-            //}
+            int i = 0;
+            int length = data.length();
+            //System.out.println("T[" + thread_number + "] Recebeu: "+data);
+            String[] words = new String[length];
+            StringTokenizer tokens = new StringTokenizer(data);
+            while (tokens.hasMoreElements()) {
+                words[i] = tokens.nextToken();
+                if(words[i].equals("url")){
+                    String garbage = tokens.nextToken();
+                    String Url = tokens.nextToken();
+                    if(!queue.contains(Url)){
+                        queue.add(Url);
+                    }
+                }
+                i = i + 1;
+            }
         } catch(EOFException e) {
             System.out.println("EOF:" + e);
         } catch(IOException e) {
