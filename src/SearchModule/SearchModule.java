@@ -33,36 +33,42 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
     public void ShareInfo(String name, String s) throws RemoteException {
         System.out.println("> " + s);
 
-        // 1o passo - criar socket
-        try (Socket socket = new Socket("localhost", serversocket)) {
-            //System.out.println("SOCKET=" + s);
+        String[] str= s.split(" ");
+        if (str[0].equals("index")){
+            // 1o passo - criar socket
+            try (Socket socket = new Socket("localhost", serversocket)) {
+                //System.out.println("SOCKET=" + s);
 
-            // 2o passo
-            DataInputStream in = new DataInputStream(socket.getInputStream());
-            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+                // 2o passo
+                //DataInputStream in = new DataInputStream(socket.getInputStream());
+                DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 
-            // 3o passo
-            try (Scanner sc = new Scanner(System.in)) {
-                //while (true) {
-                
-                // WRITE INTO THE SOCKET
-                out.writeUTF(s);
+                // 3o passo
+                //try (Scanner sc = new Scanner(System.in)) {
+                    //while (true) {
 
-                // READ FROM SOCKET
-                //String data = in.readUTF();
+                    // WRITE INTO THE SOCKET
+                    out.writeUTF(str[1]);
 
-                // DISPLAY WHAT WAS READ
-                //System.out.println("Received: " + data);
+                    // READ FROM SOCKET
+                    //String data = in.readUTF();
+
+                    // DISPLAY WHAT WAS READ
+                    //System.out.println("Received: " + data);
+                    //}
+                    socket.close();
                 //}
-            }
 
-        } catch (UnknownHostException e) {
-            System.out.println("Sock:" + e.getMessage());
-        } catch (EOFException e) {
-            System.out.println("EOF:" + e.getMessage());
-        } catch (IOException e) {
-            System.out.println("IO:" + e.getMessage());
+            } catch (UnknownHostException e) {
+                System.out.println("Sock:" + e.getMessage());
+            } catch (EOFException e) {
+                System.out.println("EOF:" + e.getMessage());
+            } catch (IOException e) {
+                System.out.println("IO:" + e.getMessage());
+            }
         }
+
+
 
         for (int i = 0; i < client.size(); i++) {
             if(!nomes.get(i).equalsIgnoreCase(name)){
