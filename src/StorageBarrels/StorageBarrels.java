@@ -1,4 +1,4 @@
-package src;
+package src.StorageBarrels;
 
 public class StorageBarrels {
 }

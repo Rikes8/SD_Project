@@ -1,4 +1,4 @@
-package src;
+package src.Queue;
 
 
 import java.net.*;
@@ -8,20 +8,19 @@ import java.util.concurrent.*;
 public class Queue {
     private static int serverPort = 6000;
 
-    //FIXME: QUEUE
+    //LinkedBlockingQueue does not need size
     public static LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<>();
 
     public static void main(String args[]){
 
-
         int numero=0;
 
         try (ServerSocket listenSocket = new ServerSocket(serverPort)) {
-            System.out.println("A escuta no porto 6000");
+            //System.out.println("A escuta no porto 6000");
             System.out.println("LISTEN SOCKET=" + listenSocket);
             while(true) {
                 Socket clientSocket = listenSocket.accept(); // BLOQUEANTE
-                System.out.println("CLIENT_SOCKET (created at accept())="+clientSocket);
+                //System.out.println("CLIENT_SOCKET (created at accept())="+clientSocket);
                 numero++;
                 new Connection(clientSocket, numero, queue);
             }
@@ -53,17 +52,13 @@ class Connection extends Thread {
     //=============================
     public void run(){
 
+        String resposta;
         try {
             //while(true){
-                //an echo server
-                String data = in.readUTF();
-                System.out.println("T[" + thread_number + "] Recebeu: "+data);
-
-                //add urls to linked list
-                queue.add(data);
-                System.out.println("queue contains " + queue);
-
-                //out.writeUTF(data);
+            //an echo server
+            String data = in.readUTF();
+            System.out.println("T[" + thread_number + "] Recebeu: "+data);
+            //out.writeUTF(data);
             //}
         } catch(EOFException e) {
             System.out.println("EOF:" + e);
