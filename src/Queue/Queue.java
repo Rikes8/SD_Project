@@ -6,6 +6,8 @@ import java.util.SimpleTimeZone;
 import java.util.StringTokenizer;
 import java.util.concurrent.*;
 
+import static java.lang.Integer.parseInt;
+
 public class Queue {
     private static int serverPort = 6000;
 
@@ -55,25 +57,40 @@ class Connection extends Thread {
 
         String resposta;
         try {
-            //while(true){
+
             //an echo server
             String data = in.readUTF();
             int i = 0;
             int length = data.length();
-            //System.out.println("T[" + thread_number + "] Recebeu: "+data);
+
             String[] words = new String[length];
             StringTokenizer tokens = new StringTokenizer(data);
             while (tokens.hasMoreElements()) {
+
                 words[i] = tokens.nextToken();
-                if(words[i].equals("url")){
+                if (words[i].equals("url")) {
                     String garbage = tokens.nextToken();
                     String Url = tokens.nextToken();
-                    if(!queue.contains(Url)){
+                    if (!queue.contains(Url)) {
+                        //System.out.println("T[" + thread_number + "] Recebeu: "+Url);
                         queue.add(Url);
                     }
                 }
                 i = i + 1;
             }
+
+            //receber o index do cliente mas pode ser otimizado
+            String[] aux =data.split(" ");
+            if (aux.length == 2){
+
+                String Url = aux[1];
+                if (!queue.contains(Url)) {
+                    //System.out.println("T[" + thread_number + "] Recebeu: "+Url);
+                    queue.add(Url);
+                }
+            }
+
+            System.out.println("queue contains " + queue);
         } catch(EOFException e) {
             System.out.println("EOF:" + e);
         } catch(IOException e) {

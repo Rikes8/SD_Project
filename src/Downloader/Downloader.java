@@ -21,6 +21,7 @@ public class Downloader {
         String[] words = new String[101];
         int i = 0;
         try {
+            
             Document doc = Jsoup.connect(url).get();
             words[i] = url; //FIXME: url of the words, first place in the array
             i = i +1;

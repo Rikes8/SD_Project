@@ -45,6 +45,7 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
             try (Socket socket = new Socket("localhost", serversocket)) {
 
                 DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+                str[1] = "toQueue " + str[1];
                 out.writeUTF(str[1]);
 
             } catch (UnknownHostException e) {
