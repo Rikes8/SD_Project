@@ -59,8 +59,9 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
 
             message = "link indexado!";
 
-        }else{
-            message = barrels.get(0).ShareInfoToBarrel("");
+        }else if(str[0].equals("search")){
+
+            message = barrels.get(0).ShareInfoToBarrel(str[1]);
         }
 
 
