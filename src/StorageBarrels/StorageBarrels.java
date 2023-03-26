@@ -1,5 +1,6 @@
 package src.StorageBarrels;
 
+import src.Classes.Word;
 import src.SearchModule.ServerInterface;
 import java.rmi.*;
 import java.rmi.registry.LocateRegistry;
@@ -7,8 +8,10 @@ import java.rmi.registry.Registry;
 import java.rmi.server.*;
 import java.net.*;
 import java.io.*;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
+import java.util.concurrent.*;
+
+import src.Classes.*;
 
 //TODO:=====================ALERT!!!===============================
 //downloader avisa que vai enviar pacote comn bytes, barrelsavisam quer receberem e depois acks
@@ -17,6 +20,9 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
 
     private static String MULTICAST_ADDRESS = "224.3.2.1";
     private static int PORT = 4321;
+
+    //FIXME: Penso que não devia estar static
+    private static  ConcurrentHashMap<Word,HashSet<Url>> index = new  ConcurrentHashMap<Word,HashSet<Url>>();
 
     StorageBarrels() throws RemoteException {
         super();
@@ -38,6 +44,49 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
         }
 
         return "RECEBER INFO DO BARREL";
+    }
+
+    //FIXME: Testes.Não que não devia estar static.
+   public static void printMap( ConcurrentHashMap<Word, HashSet<Url>> index)
+    {
+        Set<Word> key = index.keySet();
+        Set<Url> url;
+        for(Word e: key){
+            url = index.get(e);
+            System.out.println(e.getWord() + e.getCount());
+            for(Url u: url){
+                System.out.println(u.getName());
+            }
+        }
+
+    }
+    //FIXME: Testes.Não devia estar static.
+    public static void AddIndexInfo(Url url, ConcurrentHashMap<Word,HashSet<Url>> index,List<String> words) {
+        Set<Word> key = index.keySet();
+        if(key.isEmpty()) {
+            for (String s : words) {
+                Word w = new Word(s);
+                HashSet<Url> w_set = new HashSet<Url>();
+                w_set.add(url);
+                index.put(w, w_set);
+            }
+        }
+        else {
+            for (Word k : key) {
+                for (String s : words) {
+
+                    if (k.getWord().equals(s)) {
+                        index.get(k).add(url);
+                    } else {
+                        Word w = new Word(s);
+                        HashSet<Url> w_set = new HashSet<Url>();
+                        w_set.add(url);
+                        index.put(w, w_set);
+                    }
+                }
+            }
+        }
+        printMap(index);
     }
 
     public static void main(String args[]) throws IOException, NotBoundException {
@@ -84,6 +133,44 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                     System.out.println("Received message packet from " + sms_packet.getAddress().getHostAddress() + ":" + sms_packet.getPort() + " with message:");
                     String sms = new String(sms_packet.getData(), 0, sms_packet.getLength());
                     System.out.println(sms);
+
+                   //FIXME: Meter isto numa função
+                    String words = null;String garbage = null;String name = null;
+                    String title = null;String quote = null;
+                    List<String> url_apointed = new ArrayList<>();
+                    List<String> word = new ArrayList<>();
+
+                    StringTokenizer tokens = new StringTokenizer(sms);
+                    while (tokens.hasMoreElements()) {
+                        words = tokens.nextToken();
+                        if (words.equals("url")) {
+                            garbage = tokens.nextToken();
+                            name = tokens.nextToken();
+                        }
+                        if(words.equals("title")) {
+                            garbage = tokens.nextToken();
+                            title = tokens.nextToken();
+                        }
+                        if(words.equals("quote")){
+                            garbage = tokens.nextToken();
+                            quote = tokens.nextToken();
+                        }
+                        if(words.equals("word")){
+                            garbage = tokens.nextToken();
+                            words = tokens.nextToken();
+                            if(!word.contains(words))
+                                word.add(words);
+                        }
+                        if(words.equals("url_ap")){
+                            garbage = tokens.nextToken();
+                            words = tokens.nextToken();
+                            if(!url_apointed.contains(words))
+                                url_apointed.add(words);
+                        }
+                    }
+                    Url url = new Url(name,title,quote,url_apointed);
+                    AddIndexInfo(url,index,word);
+                    //////////////////////////////////////////////
 
                     /*
                     //send ack

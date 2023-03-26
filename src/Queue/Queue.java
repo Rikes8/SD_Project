@@ -68,7 +68,7 @@ class Connection extends Thread {
             while (tokens.hasMoreElements()) {
 
                 words[i] = tokens.nextToken();
-                if (words[i].equals("url")) {
+                if (words[i].equals("url_ap")) {
                     String garbage = tokens.nextToken();
                     String Url = tokens.nextToken();
                     if (!queue.contains(Url)) {
