@@ -5,8 +5,16 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.jsoup.select.Evaluator;
+import src.SearchModule.ServerInterface;
+import src.StorageBarrels.BarrelsInterface;
+import src.StorageBarrels.StorageBarrels;
 
 import java.io.IOException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.server.ServerNotActiveException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -18,7 +26,7 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.io.IOException;
 
-public class Downloader extends Thread {
+public class Downloader extends UnicastRemoteObject implements DownloaderInterface {
 
     //FIXME: TCP
     private static int serversocket = 6000;
@@ -27,9 +35,21 @@ public class Downloader extends Thread {
     private static String MULTICAST_ADDRESS = "224.3.2.1";
     private static int PORT = 4321;
     private static long SLEEP_TIME = 5000;
+    private int id;
 
+    public Downloader() throws RemoteException {
+        super();
+        this.id = -1;
+    }
+
+    public String UpdateActiveDownloaders (String s) throws RemoteException {
+        return "sou dow";
+    }
 
     public void run() {
+
+
+
         try (Socket socket = new Socket("localhost", serversocket)) {
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
             DataInputStream in = new DataInputStream(socket.getInputStream());
@@ -118,7 +138,7 @@ public class Downloader extends Thread {
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, PORT);
                     multicast_socket.send(packet);
 
-                    try { sleep((long) (Math.random() * SLEEP_TIME)); } catch (InterruptedException e) { }
+                    //try { sleep((long) (Math.random() * SLEEP_TIME)); } catch (InterruptedException e) { }
 
                     //===============================================================================
                     //==========================   TCP   ==================================
@@ -143,8 +163,31 @@ public class Downloader extends Thread {
         }
     }
 
-    public static void main(String args[]) {
-        Downloader downloader = new Downloader();
-        downloader.start();
+    public static void main(String args[]) throws RemoteException, NotBoundException, ServerNotActiveException {
+
+
+        String nome = "localhost";
+        ServerInterface server = (ServerInterface) LocateRegistry.getRegistry(9000).lookup("DOWNLOADER");
+        Downloader down = new Downloader();
+        down.id = server.subscribe_downloader(nome, (DownloaderInterface) down);
+        System.out.println("Downloader sent subscription to server");
+
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                //guardar info no ficheiro
+
+                try {
+                    server.ShareInfoToServer(down.id,"-1d");
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
+                System.out.println("Downloader ending...");
+            }
+        });
+
+        down.run();
+
+
     }
 }

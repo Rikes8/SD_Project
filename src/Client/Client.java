@@ -36,7 +36,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
             while (true) {
                 System.out.print("> ");
                 ClientInput = reader.readLine();
-                System.out.println(h.ShareInfoToServer(nome, ClientInput));
+                System.out.println(h.ShareInfoToServer(-1, ClientInput));
             }
         } catch (Exception e) {
             System.out.println("Exception in main: " + e);

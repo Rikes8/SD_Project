@@ -12,6 +12,7 @@ import java.util.*;
 import java.util.concurrent.*;
 
 import src.Classes.*;
+import sun.misc.Signal;
 
 //TODO:=====================ALERT!!!===============================
 //downloader avisa que vai enviar pacote comn bytes, barrelsavisam quer receberem e depois acks
@@ -20,12 +21,14 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
 
     private static String MULTICAST_ADDRESS = "224.3.2.1";
     private static int PORT = 4321;
+    private int id;
 
     //FIXME: Penso que não devia estar static
     private static  ConcurrentHashMap<Word,HashSet<Url>> index = new  ConcurrentHashMap<Word,HashSet<Url>>();
 
-    StorageBarrels() throws RemoteException {
+    public StorageBarrels() throws RemoteException {
         super();
+        this.id = -1;
     }
 
     //FIXME: RMI Callback -> INPUT QUE VEM DO CLIENTE E QUE REQUERE IR BUSCAR INFO AO BARREL
@@ -89,17 +92,20 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
         printMap(index);
     }
 
-    public static void main(String args[]) throws IOException, NotBoundException {
+    public static void main(String args[]) throws IOException, NotBoundException, ServerNotActiveException {
         // usage: java HelloClient username
         //System.getProperties().put("java.security.policy", "policy.all");
         //System.setSecurityManager(new RMISecurityManager());
+
+
+
 
         //FIXME: Multicast thread
 
         String nome = "localhost";
         ServerInterface h = (ServerInterface) LocateRegistry.getRegistry(8000).lookup("BARREL");
         StorageBarrels b = new StorageBarrels();
-        h.subscribe_barrel(nome, (BarrelsInterface) b);
+        b.id = h.subscribe_barrel(nome, (BarrelsInterface) b);
         System.out.println("Barrel sent subscription to server");
 
 
@@ -194,6 +200,18 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
         });
         multicast.start();
 
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                //guardar info no ficheiro
+
+                try {
+                    h.ShareInfoToServer(b.id,"-1b");
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
+                System.out.println("Storage Barrel ending...");
+            }
+        });
 
 
         //FIXME: RMI com SearchModule
@@ -206,11 +224,13 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
 
                 System.out.print("> ");
                 ClientInput = reader.readLine();
-                h.ShareInfoToServer(nome, ClientInput);
+                h.ShareInfoToServer(b.id, ClientInput);
             } catch (Exception e) {
                 System.out.println("Exception in main: " + e);
             }
         }
+
+
 
 
 
