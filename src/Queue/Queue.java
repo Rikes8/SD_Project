@@ -36,7 +36,7 @@ public class Queue {
 //= Thread para tratar de cada canal de comunicação com um cliente
 class Connection extends Thread {
     DataInputStream in;
-    //DataOutputStream out;
+    DataOutputStream out;
     Socket clientSocket;
     int thread_number;
     LinkedBlockingQueue<String> queue;
@@ -47,54 +47,64 @@ class Connection extends Thread {
         try{
             clientSocket = aClientSocket;
             in = new DataInputStream(clientSocket.getInputStream());
-            //out = new DataOutputStream(clientSocket.getOutputStream());
+            out = new DataOutputStream(clientSocket.getOutputStream());
             queue = fifo;
             this.start();
         }catch(IOException e){System.out.println("Connection:" + e.getMessage());}
     }
     //=============================
     public void run(){
-
-        String resposta;
+        String data, pedido;
         try {
+            while (true) {
+                //receber pedido do downloader para dar crawl a url
+                pedido = in.readUTF();
+                String[] aux = pedido.split(" ");
 
-            //an echo server
-            String data = in.readUTF();
-            int i = 0;
-            int length = data.length();
 
-            String[] words = new String[length];
-            StringTokenizer tokens = new StringTokenizer(data);
-            while (tokens.hasMoreElements()) {
+                if (aux[0].equals("pedido")) {
+                    //envia url ao downloader
+                    out.writeUTF(queue.take());
 
-                words[i] = tokens.nextToken();
-                if (words[i].equals("url_ap")) {
-                    String garbage = tokens.nextToken();
-                    String Url = tokens.nextToken();
+                    //receber info do downloader
+                    data = in.readUTF();
+
+                    int i = 0;
+                    int length = data.length();
+                    String[] words = new String[length];
+                    StringTokenizer tokens = new StringTokenizer(data);
+                    while (tokens.hasMoreElements()) {
+                        words[i] = tokens.nextToken();
+                        if (words[i].equals("url_ap")) {
+                            String garbage = tokens.nextToken();
+                            String Url = tokens.nextToken();
+                            if (!queue.contains(Url)) {
+                                //System.out.println("T[" + thread_number + "] Recebeu: "+Url);
+                                queue.add(Url);
+                            }
+                        }
+                        i = i + 1;
+                    }
+
+                }else if (aux.length == 2){ //receber do cliente
+                    out.writeUTF("message received!");
+                    String Url = aux[1];
                     if (!queue.contains(Url)) {
                         //System.out.println("T[" + thread_number + "] Recebeu: "+Url);
                         queue.add(Url);
                     }
                 }
-                i = i + 1;
+                pedido = "";
+                System.out.println("queue contains " + queue);
             }
 
-            //receber o index do cliente mas pode ser otimizado
-            String[] aux =data.split(" ");
-            if (aux.length == 2){
 
-                String Url = aux[1];
-                if (!queue.contains(Url)) {
-                    //System.out.println("T[" + thread_number + "] Recebeu: "+Url);
-                    queue.add(Url);
-                }
-            }
-
-            System.out.println("queue contains " + queue);
         } catch(EOFException e) {
             System.out.println("EOF:" + e);
         } catch(IOException e) {
-            System.out.println("IO:" + e);
+            System.out.println(" ");
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 

@@ -132,7 +132,7 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                     }
                     System.out.println("Received message packet from " + sms_packet.getAddress().getHostAddress() + ":" + sms_packet.getPort() + " with message:");
                     String sms = new String(sms_packet.getData(), 0, sms_packet.getLength());
-                    System.out.println(sms);
+
 
                    //FIXME: Meter isto numa função
                     String words = null;String garbage = null;String name = null;
