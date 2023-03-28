@@ -8,8 +8,11 @@ import src.SearchModule.ServerInterface;
 
 public class Client extends UnicastRemoteObject implements ClientInterface {
 
+    private int id;
+
     Client() throws RemoteException {
         super();
+        this.id = -1;
     }
 
     //Func RMI Callback to send info to searchModule and receive sth
@@ -17,6 +20,10 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     //    System.out.println(">> " + s);
     //    return "";
     //}
+
+    public void print_on_client(String s) throws RemoteException {
+        System.out.println("Updated stats:\n" + s);
+    }
 
     public static void main(String args[]) {
 
@@ -31,7 +38,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
             String nome = "localhost";
             ServerInterface h = (ServerInterface) LocateRegistry.getRegistry(7000).lookup("XPTO"); //r.lookup("XPTO");
             Client c = new Client();
-            h.subscribe(nome, (ClientInterface) c);
+            c.id = h.subscribe_client(nome, (ClientInterface) c);
             System.out.println("Client sent subscription to server");
             while (true) {
                 System.out.print("> ");

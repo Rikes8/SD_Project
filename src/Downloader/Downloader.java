@@ -171,6 +171,7 @@ public class Downloader extends UnicastRemoteObject implements DownloaderInterfa
         Downloader down = new Downloader();
         down.id = server.subscribe_downloader(nome, (DownloaderInterface) down);
         System.out.println("Downloader sent subscription to server");
+        //server.ShareInfoToServer(down.id,"+1d");
 
 
         Runtime.getRuntime().addShutdownHook(new Thread() {

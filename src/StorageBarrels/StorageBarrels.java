@@ -107,6 +107,7 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
         StorageBarrels b = new StorageBarrels();
         b.id = h.subscribe_barrel(nome, (BarrelsInterface) b);
         System.out.println("Barrel sent subscription to server");
+        //h.ShareInfoToServer(b.id,"+1b");
 
 
         MulticastSocket multicast_socket = new MulticastSocket(PORT);

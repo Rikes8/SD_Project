@@ -13,6 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
+import src.Client.Client;
 import src.Client.ClientInterface;
 import src.Downloader.Downloader;
 import src.Downloader.DownloaderInterface;
@@ -29,27 +30,35 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
 
     private static final long serialVersionUID = 1L;
 
-    static ArrayList<ClientInterface> client = new ArrayList<>();
-    static ArrayList<String> nomes = new ArrayList<>();
-    static ArrayList<BarrelsInterface> barrels = new ArrayList<>();
-    //static ArrayList<String> IP_barrels = new ArrayList<>();
-    static ArrayList<DownloaderInterface> downloaders = new ArrayList<>();
-    //static ArrayList<String> IP_downloaders = new ArrayList<>();
+    private int flag = 0;
 
+    static ArrayList<ClientInterface> clients = new ArrayList<>();
+    static HashMap<Integer,String> IpClients = new HashMap<>();
+
+    static ArrayList<BarrelsInterface> barrels = new ArrayList<>();
     static HashMap<Integer,String> IpBarrels = new HashMap<>();
+
+    static ArrayList<DownloaderInterface> downloaders = new ArrayList<>();
     static HashMap<Integer,String> IpDownloaders = new HashMap<>();
+
+
 
     public SearchModule() throws RemoteException {
         super();
     }
 
-    public int subscribe_barrel(String name, BarrelsInterface b) throws RemoteException, ServerNotActiveException {
+    public int subscribe_barrel(String name, BarrelsInterface barrel) throws RemoteException, ServerNotActiveException {
         System.out.println("Barrel Subscribing " + name);
         System.out.print("> ");
-        barrels.add(b);
+        barrels.add(barrel);
 
         int key = IpBarrels.size();
         IpBarrels.put(key,StorageBarrels.getClientHost());
+
+        if (flag == 1){
+            printStats(IpDownloaders,IpBarrels);
+        }
+
         return key;
     }
 
@@ -60,20 +69,56 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
 
         int key = IpDownloaders.size();
         IpDownloaders.put(key,Downloader.getClientHost());
+
+        if (flag == 1){
+            printStats(IpDownloaders,IpBarrels);
+        }
+
+
         return key;
     }
 
-    public void subscribe(String name, ClientInterface c) throws RemoteException {
+    public int subscribe_client(String name, ClientInterface client) throws RemoteException, ServerNotActiveException {
         System.out.println("Client Subscribing " + name);
         System.out.print("> ");
-        client.add(c);
-        nomes.add(name);
+        clients.add(client);
+
+        int key = IpClients.size();
+        IpClients.put(key, Client.getClientHost());
+
+        return key;
     }
+
+    public void printStats(HashMap<Integer,String> IpDownloaders, HashMap<Integer,String> IpBarrels) throws RemoteException {
+        String message = "---Server Statistics---\n";
+
+        message = message +"Active Downloaders("+IpDownloaders.size() +"):\n";
+
+        for (Map.Entry<Integer, String> entry : IpDownloaders.entrySet()) {
+            //System.out.println(entry.getKey() + " -> " + entry.getValue());
+            message = message + "ID: 1." + entry.getKey() + "     "+ entry.getValue() +"\n";
+        }
+
+        message = message + "Active Barrels("+IpBarrels.size()+"):\n";
+
+        for (Map.Entry<Integer, String> entry : IpBarrels.entrySet()) {
+            //System.out.println(entry.getKey() + " -> " + entry.getValue());
+            message = message + "ID: 2." + entry.getKey() + "     "+ entry.getValue() +"\n";
+        }
+
+
+        for (int i = 0; i < clients.size(); i++) {
+            clients.get(i).print_on_client(message);
+        }
+    }
+
 
     public String ShareInfoToServer(int id, String s) throws RemoteException {
         String message = "";
-        String message_aux = "";
         String[] str= s.split(" ");
+
+
+
         if (str[0].equals("index")){
 
             try (Socket socket = new Socket("localhost", serversocket)) {
@@ -99,20 +144,11 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
 
         }else if(str[0].equals("stats")){
 
-            message = "---Server Statistics---\n"+
-                    "Active Downloaders("+ IpDownloaders.size()+"):\n"+
-                    message_aux;
-
-            for (Map.Entry<Integer, String> entry : IpDownloaders.entrySet()) {
-                //System.out.println(entry.getKey() + " -> " + entry.getValue());
-                message = message + "ID: 1." + entry.getKey() + "     "+ entry.getValue() +"\n";
-            }
-
-            message = message + "Active Barrels("+ IpBarrels.size()+"):\n";
-
-            for (Map.Entry<Integer, String> entry : IpBarrels.entrySet()) {
-                //System.out.println(entry.getKey() + " -> " + entry.getValue());
-                message = message + "ID: 2." + entry.getKey() + "     "+ entry.getValue() +"\n";
+            if (flag == 0){
+                flag = 1;
+                printStats(IpDownloaders,IpBarrels);
+            }else{
+                flag = 0;
             }
 
         }else if(str[0].equals("-1b")){
@@ -121,17 +157,21 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
                 if (entry.getKey() == id){
                     IpBarrels.remove(id);
                 }
-
-                message = message + "ID: 2." + entry.getKey() + "     "+ entry.getValue() +"\n";
             }
+            if (flag == 1){
+                printStats(IpDownloaders,IpBarrels);
+            }
+
 
         }else if (str[0].equals("-1d")) {
             for (Map.Entry<Integer, String> entry : IpDownloaders.entrySet()) {
                 //System.out.println(entry.getKey() + " -> " + entry.getValue());
-                if (entry.getKey() == id){
+                if (entry.getKey() == id) {
                     IpDownloaders.remove(id);
                 }
-                message = message + "ID: 1." + entry.getKey() + "     "+ entry.getValue() +"\n";
+            }
+            if (flag == 1) {
+                printStats(IpDownloaders, IpBarrels);
             }
         }
 
@@ -153,7 +193,7 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
         BufferedReader reader = new BufferedReader(input);
 
         try {
-            //User user = new User();
+
             SearchModule h = new SearchModule();
 
             Registry r = LocateRegistry.createRegistry(7000);
@@ -170,8 +210,10 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
             while (true) {
                 System.out.print("> ");
                 a = reader.readLine();
-
             }
+
+
+
         } catch (Exception re) {
             System.out.println("Exception in HelloImpl.main: " + re);
         }
