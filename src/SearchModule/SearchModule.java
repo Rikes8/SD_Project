@@ -96,14 +96,12 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
         message = message +"Active Downloaders("+IpDownloaders.size() +"):\n";
 
         for (Map.Entry<Integer, String> entry : IpDownloaders.entrySet()) {
-            //System.out.println(entry.getKey() + " -> " + entry.getValue());
             message = message + "ID: 1." + entry.getKey() + "     "+ entry.getValue() +"\n";
         }
 
         message = message + "Active Barrels("+IpBarrels.size()+"):\n";
 
         for (Map.Entry<Integer, String> entry : IpBarrels.entrySet()) {
-            //System.out.println(entry.getKey() + " -> " + entry.getValue());
             message = message + "ID: 2." + entry.getKey() + "     "+ entry.getValue() +"\n";
         }
 
@@ -199,6 +197,17 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
             //Pode ser substituido por data
 
             barrels.get(0).ShareInfoToBarrel(send);
+
+        }else if (str[0].equals("login")) {
+            username = str[1];
+            password = str[2];
+            send = "login" + " " + username + " " + password + " "+ client_id;
+            //Pode ser substituido por data
+
+
+            //FIXME: recebe mensagem a dizer que o login foi aceite.
+            message = barrels.get(0).ShareInfoToBarrel(send);
+
         }
 
 

@@ -22,9 +22,11 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
     private static String MULTICAST_ADDRESS = "224.3.2.1";
     private static int PORT = 4321;
     private int id;
-    private String file = "src/StorageBarrels/file.obj";
+    //private String file = "src/StorageBarrels/file.obj";
 
-    static HashMap<Integer,User> usersBackup = new HashMap<Integer,User>();
+    //static HashMap<Integer,User> usersBackup = new HashMap<Integer,User>();
+    private ArrayList<User> users = new ArrayList<>();
+
 
     //FIXME: Penso que não devia estar static
     private static  ConcurrentHashMap<Word,HashSet<Url>> index = new  ConcurrentHashMap<Word,HashSet<Url>>();
@@ -39,83 +41,88 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
 
 
         String[] str= s.split(" ");
-        if (str[0].equals("register")){
+        if (str[0].equals("register")) {
+            //File file = new File("src/StorageBarrels/file.obj");
+            String file = "src/StorageBarrels/file.obj";
+            User u = new User(str[1], str[2], Integer.parseInt(str[3]));
+            try {
+                FileOutputStream fos = new FileOutputStream(file);
+                ObjectOutputStream oos = new ObjectOutputStream(fos);
 
-            try{
-                File f = new File(file);
-                if(f.exists()){
-                    if(f.length() != 0) {
+                FileInputStream fin = new FileInputStream(file);
+                ObjectInputStream in = new ObjectInputStream(fin);
+
+                if (file.length() != 0) {
+                    while (true) {
                         try {
-                            System.out.println("aqui");
-                            FileInputStream fin = new FileInputStream(f);
-                            ObjectInputStream in = new ObjectInputStream(fin);
-
-                            FileOutputStream fout = new FileOutputStream(f);
-                            ObjectOutputStream out = new ObjectOutputStream(fout);
-
-
-                            try {
-
-                                System.out.println("1");
-                                //get oque estava no ficheiro
-                                User usr = (User) in.readObject();
-                                System.out.println("1.1");
-                                usersBackup.put(usr.getId(), usr);
-
-                                System.out.println("2");
-                                //adicionar novo user ao hashmap
-                                User u = new User(str[1], str[2], Integer.parseInt(str[3]));
-                                usersBackup.put(u.getId(), u);
-
-                                System.out.println("3");
-                                //enviar para o ficheiro
-                                out.writeObject(usersBackup);
-
-                                System.out.println("4");
-                                //teste: ler
-                                User usr1 = (User) in.readObject();
-                                usersBackup.put(usr1.getId(), usr1);
-
-                                System.out.println("here");
-                                for (Integer name: usersBackup.keySet()) {
-                                    String key = name.toString();
-                                    String value = usersBackup.get(name).toString();
-                                    System.out.println(key + " " + value);
-                                }
-
-
-                            } catch (EOFException e) {
-                                // EOF
-                                System.out.println("EOF");
-                            }
-
-
-                            /*in.close();
-                            fin.close();*/
-                        } catch (IOException | ClassNotFoundException e) {
-                            e.printStackTrace();
-                        }  catch (NumberFormatException e) {
-                            throw new RuntimeException(e);
+                            User in_file = (User) in.readObject();
+                            users.add(in_file);
+                        } catch (Exception e) {
+                            break; // eof
                         }
                     }
-                }else{
-                    f.createNewFile();
+
                 }
 
-                /*FileOutputStream file = new FileOutputStream("src/StorageBarrels/file.obj");
-                ObjectOutputStream out = new ObjectOutputStream(file);
+                users.add(u);
 
-                out.writeObject(u);
-                out.close();
-                file.close();*/
+                /*for (User usr : users) {
+                    System.out.println(usr);;
+                }*/
 
+                for (User usr : users) {
+                    oos.writeObject(usr);
+                }
 
-            }catch (FileNotFoundException e) {
-                System.out.println("File not found");
-            }catch (IOException e) {
-                System.out.println("Error writing file: " + e.getMessage());
+                oos.close();
+                in.close();
+                return "Client Registed";
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
 
+        }else if (str[0].equals("login")) {
+            String file = "src/StorageBarrels/file.obj";
+            try {
+                FileInputStream ffin = new FileInputStream(file);
+                ObjectInputStream iin = new ObjectInputStream(ffin);
+
+                if (file.length() != 0) {
+                    while (true) {
+                        try {
+                            User iin_file = (User) iin.readObject();
+                            users.add(iin_file);
+                        } catch (Exception e) {
+                            break; // eof
+                        }
+                    }
+
+                }
+                iin.close();
+
+                for (User usr : users) {
+                    System.out.println(usr);;
+                }
+
+                for (User usr : users) {
+
+                    if (usr.getName().equals(str[1]) && usr.getPassword().equals(str[2]) /*&& usr.getId() == Integer.parseInt(str[3])*/){
+
+                        users.clear();
+                        return "Client Logged";
+                    }
+                }
+
+
+
+                return "Wrong Client Credential";
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
 
