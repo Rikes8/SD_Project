@@ -17,11 +17,14 @@ import sun.misc.Signal;
 //TODO:=====================ALERT!!!===============================
 //downloader avisa que vai enviar pacote comn bytes, barrelsavisam quer receberem e depois acks
 
-public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInterface {
+public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInterface, Serializable{
 
     private static String MULTICAST_ADDRESS = "224.3.2.1";
     private static int PORT = 4321;
     private int id;
+    private String file = "src/StorageBarrels/file.obj";
+
+    static HashMap<Integer,User> usersBackup = new HashMap<Integer,User>();
 
     //FIXME: Penso que não devia estar static
     private static  ConcurrentHashMap<Word,HashSet<Url>> index = new  ConcurrentHashMap<Word,HashSet<Url>>();
@@ -33,7 +36,88 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
 
     //FIXME: RMI Callback -> INPUT QUE VEM DO CLIENTE E QUE REQUERE IR BUSCAR INFO AO BARREL
     public String ShareInfoToBarrel(String s) throws RemoteException {
-        //System.out.println(">> " + s);
+
+
+        String[] str= s.split(" ");
+        if (str[0].equals("register")){
+
+            try{
+                File f = new File(file);
+                if(f.exists()){
+                    if(f.length() != 0) {
+                        try {
+                            System.out.println("aqui");
+                            FileInputStream fin = new FileInputStream(f);
+                            ObjectInputStream in = new ObjectInputStream(fin);
+
+                            FileOutputStream fout = new FileOutputStream(f);
+                            ObjectOutputStream out = new ObjectOutputStream(fout);
+
+
+                            try {
+
+                                System.out.println("1");
+                                //get oque estava no ficheiro
+                                User usr = (User) in.readObject();
+                                System.out.println("1.1");
+                                usersBackup.put(usr.getId(), usr);
+
+                                System.out.println("2");
+                                //adicionar novo user ao hashmap
+                                User u = new User(str[1], str[2], Integer.parseInt(str[3]));
+                                usersBackup.put(u.getId(), u);
+
+                                System.out.println("3");
+                                //enviar para o ficheiro
+                                out.writeObject(usersBackup);
+
+                                System.out.println("4");
+                                //teste: ler
+                                User usr1 = (User) in.readObject();
+                                usersBackup.put(usr1.getId(), usr1);
+
+                                System.out.println("here");
+                                for (Integer name: usersBackup.keySet()) {
+                                    String key = name.toString();
+                                    String value = usersBackup.get(name).toString();
+                                    System.out.println(key + " " + value);
+                                }
+
+
+                            } catch (EOFException e) {
+                                // EOF
+                                System.out.println("EOF");
+                            }
+
+
+                            /*in.close();
+                            fin.close();*/
+                        } catch (IOException | ClassNotFoundException e) {
+                            e.printStackTrace();
+                        }  catch (NumberFormatException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }else{
+                    f.createNewFile();
+                }
+
+                /*FileOutputStream file = new FileOutputStream("src/StorageBarrels/file.obj");
+                ObjectOutputStream out = new ObjectOutputStream(file);
+
+                out.writeObject(u);
+                out.close();
+                file.close();*/
+
+
+            }catch (FileNotFoundException e) {
+                System.out.println("File not found");
+            }catch (IOException e) {
+                System.out.println("Error writing file: " + e.getMessage());
+            }
+
+        }
+
 
         //FIXME:SO PARA TESTAR
         String[] teste = {"teste" , "http://uc.pt" , "teste2", "http://sapo.pt"};
@@ -108,7 +192,6 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
         b.id = h.subscribe_barrel(nome, (BarrelsInterface) b);
         System.out.println("Barrel sent subscription to server");
         //h.ShareInfoToServer(b.id,"+1b");
-
 
         MulticastSocket multicast_socket = new MulticastSocket(PORT);
         InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS);

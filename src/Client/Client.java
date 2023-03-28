@@ -39,6 +39,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
             ServerInterface h = (ServerInterface) LocateRegistry.getRegistry(7000).lookup("XPTO"); //r.lookup("XPTO");
             Client c = new Client();
             c.id = h.subscribe_client(nome, (ClientInterface) c);
+            //h.ShareInfoToServer(c.id, "+1c");
             System.out.println("Client sent subscription to server");
 
             Runtime.getRuntime().addShutdownHook(new Thread() {

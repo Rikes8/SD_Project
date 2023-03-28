@@ -1,13 +1,16 @@
 package src.Classes;
 
-public class User {
+import java.io.Serializable;
+
+public class User implements Serializable {
     private String name;
     private String password;
-    private boolean state;
+    private int id;
 
-    public User(String name, String password, boolean state) {
+    public User(String name, String password, int id) {
         this.name = name;
         this.password = password;
+        this.id = id;
     }
 
     public String getName() {
@@ -18,13 +21,13 @@ public class User {
         return password;
     }
 
-    public boolean isState() {
-        return state;
+    public int getId() {
+        return id;
     }
 
     @Override
     public String toString() {
-        return "User{" + "name=" + name + ", state=" + state + '}';
+        return "User{" + "name=" + name + ", id=" + id + '}';
     }
 
 }
