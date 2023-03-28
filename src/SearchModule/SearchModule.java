@@ -30,7 +30,9 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
 
     private static final long serialVersionUID = 1L;
 
-    private int flag = 0;
+
+    private int client_id;
+    private int flag = client_id;
 
     static ArrayList<ClientInterface> clients = new ArrayList<>();
     static HashMap<Integer,String> IpClients = new HashMap<>();
@@ -55,8 +57,8 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
         int key = IpBarrels.size();
         IpBarrels.put(key,StorageBarrels.getClientHost());
 
-        if (flag == 1){
-            printStats(IpDownloaders,IpBarrels);
+        if (flag == client_id +1){
+            printStats(IpDownloaders,IpBarrels,IpClients);
         }
 
         return key;
@@ -70,10 +72,9 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
         int key = IpDownloaders.size();
         IpDownloaders.put(key,Downloader.getClientHost());
 
-        if (flag == 1){
-            printStats(IpDownloaders,IpBarrels);
+        if (flag == client_id + 1){
+            printStats(IpDownloaders,IpBarrels, IpClients);
         }
-
 
         return key;
     }
@@ -89,7 +90,7 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
         return key;
     }
 
-    public void printStats(HashMap<Integer,String> IpDownloaders, HashMap<Integer,String> IpBarrels) throws RemoteException {
+    public void printStats(HashMap<Integer,String> IpDownloaders, HashMap<Integer,String> IpBarrels, HashMap<Integer,String> IpClients) throws RemoteException {
         String message = "---Server Statistics---\n";
 
         message = message +"Active Downloaders("+IpDownloaders.size() +"):\n";
@@ -107,9 +108,7 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
         }
 
 
-        for (int i = 0; i < clients.size(); i++) {
-            clients.get(i).print_on_client(message);
-        }
+        clients.get(client_id).print_on_client(message);
     }
 
 
@@ -117,7 +116,7 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
         String message = "";
         String[] str= s.split(" ");
 
-
+        client_id = id;
 
         if (str[0].equals("index")){
 
@@ -144,11 +143,11 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
 
         }else if(str[0].equals("stats")){
 
-            if (flag == 0){
-                flag = 1;
-                printStats(IpDownloaders,IpBarrels);
+            if (flag == client_id){
+                flag = client_id + 1;
+                printStats(IpDownloaders,IpBarrels, IpClients);
             }else{
-                flag = 0;
+                flag = client_id;
             }
 
         }else if(str[0].equals("-1b")){
@@ -158,8 +157,8 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
                     IpBarrels.remove(id);
                 }
             }
-            if (flag == 1){
-                printStats(IpDownloaders,IpBarrels);
+            if (flag == client_id + 1){
+                printStats(IpDownloaders,IpBarrels,IpClients);
             }
 
 
@@ -170,8 +169,15 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
                     IpDownloaders.remove(id);
                 }
             }
-            if (flag == 1) {
-                printStats(IpDownloaders, IpBarrels);
+            if (flag == client_id +1) {
+                printStats(IpDownloaders, IpBarrels,IpClients);
+            }
+        }else if(str[0].equals("-1c")){
+            for (Map.Entry<Integer, String> entry : IpClients.entrySet()) {
+                //System.out.println(entry.getKey() + " -> " + entry.getValue());
+                if (entry.getKey() == id){
+                    IpClients.remove(id);
+                }
             }
         }
 

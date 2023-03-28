@@ -40,10 +40,24 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
             Client c = new Client();
             c.id = h.subscribe_client(nome, (ClientInterface) c);
             System.out.println("Client sent subscription to server");
+
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                public void run() {
+                    //guardar info no ficheiro
+
+                    try {
+                        h.ShareInfoToServer(c.id,"-1c");
+                    } catch (RemoteException e) {
+                        throw new RuntimeException(e);
+                    }
+                    System.out.println("Client ending...");
+                }
+            });
+
             while (true) {
                 System.out.print("> ");
                 ClientInput = reader.readLine();
-                System.out.println(h.ShareInfoToServer(-1, ClientInput));
+                System.out.println(h.ShareInfoToServer(c.id, ClientInput));
             }
         } catch (Exception e) {
             System.out.println("Exception in main: " + e);
