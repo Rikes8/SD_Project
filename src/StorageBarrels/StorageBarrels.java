@@ -243,12 +243,6 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
 
                     //System.out.println(sms);
                    //FIXME: Meter isto numa função
-                    String words = null;String garbage = null;String name = null;
-                    String title = "" ;String quote = "";
-                    List<String> url_apointed = new ArrayList<>();
-                    List<String> word = new ArrayList<>();
-
-                    System.out.println("-->" + sms);
 
                     int counter_pal = 0;
                     String[] aux;
