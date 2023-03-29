@@ -49,7 +49,6 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
                     try {
                         h.ShareInfoToServer(c.id,"-1c");
                     } catch (RemoteException e) {
-                        throw new RuntimeException(e);
                     }
                     System.out.println("Client ending...");
                 }
@@ -61,7 +60,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
                 System.out.println(h.ShareInfoToServer(c.id, ClientInput));
             }
         } catch (Exception e) {
-            System.out.println("Exception in main: " + e);
+            System.out.println("SearchModule is not activated, try again later!");
         }
     }
 }

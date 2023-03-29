@@ -159,36 +159,37 @@ public class Downloader extends UnicastRemoteObject implements DownloaderInterfa
         } catch (EOFException e) {
             System.out.println("EOF:" + e.getMessage());
         } catch (IOException e) {
-            System.out.println("IO:" + e.getMessage());
+            System.out.println("Queue is not active!");
+            System.exit(0);
         }
     }
 
     public static void main(String args[]) throws RemoteException, NotBoundException, ServerNotActiveException {
 
+        try{
+            String nome = "localhost";
+            ServerInterface server = (ServerInterface) LocateRegistry.getRegistry(9000).lookup("DOWNLOADER");
+            Downloader down = new Downloader();
+            down.id = server.subscribe_downloader(nome, (DownloaderInterface) down);
+            System.out.println("Downloader sent subscription to server");
+            //server.ShareInfoToServer(down.id,"+1d");
 
-        String nome = "localhost";
-        ServerInterface server = (ServerInterface) LocateRegistry.getRegistry(9000).lookup("DOWNLOADER");
-        Downloader down = new Downloader();
-        down.id = server.subscribe_downloader(nome, (DownloaderInterface) down);
-        System.out.println("Downloader sent subscription to server");
-        //server.ShareInfoToServer(down.id,"+1d");
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                public void run() {
+                    //guardar info no ficheiro
 
-
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                //guardar info no ficheiro
-
-                try {
-                    server.ShareInfoToServer(down.id,"-1d");
-                } catch (RemoteException e) {
-                    throw new RuntimeException(e);
+                    try {
+                        server.ShareInfoToServer(down.id,"-1d");
+                    } catch (RemoteException e) {
+                    }
+                    System.out.println("Downloader ending...");
                 }
-                System.out.println("Downloader ending...");
-            }
-        });
+            });
 
-        down.run();
+            down.run();
 
-
+        }catch (Exception e) {
+            System.out.println("SearchModule is not activated!");
+        }
     }
 }
