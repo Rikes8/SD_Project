@@ -5,48 +5,59 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Url implements Serializable {
-        private static final long serialVersionUID = 1L;
-        private String name;
-        private String title;
-        private String quote;
-        private List<String> url_apointed;
-        private List<String> aim_url;
-        private int totalUrls;
+    private static final long serialVersionUID = 1L;
+    private String name;
+    private String title;
+    private String quote;
+    private ArrayList<String> words;
+    private int totalTargetUrls;
 
-        public Url(String name, String title, String quote,List<String> urls) {
-            this.name = name;
-            this.title = title;
-            this.quote = quote;
-            this.url_apointed = urls;
-            this.aim_url = new ArrayList<>();
-            this.totalUrls = 0;
-        }
+    public Url(String name, String title, String quote, ArrayList<String> words) {
+        this.name = name;
+        this.title = title;
+        this.quote = quote;
+        this.words = words;
+        this.totalTargetUrls = 0;
+    }
 
-        public void addAimUrls(String url){
-            this.aim_url.add(url);
-            this.totalUrls+=1;
-        }
-        public String getName() {
-            return name;
-        }
+    public void addAimUrls(String url){
+        //this.target_url.add(url);
+        this.totalTargetUrls+=1;
+    }
 
-        public String getTitle() {
-            return title;
-        }
+    public String getName() {
+        return name;
+    }
 
-        public String getQuote() {
-            return quote;
-        }
-        public int getTotalUrls() {
-            return totalUrls;
-        }
+    public String getTitle() {
+        return title;
+    }
 
-        @Override
-        public String toString() {
-            return "Url{" + "name=" + name + ", title=" + title + ", keywords=" + ", urls=" + url_apointed + ", totalUrls=" + totalUrls + '}';
-        }
+    public String getQuote() {
+        return quote;
+    }
 
+    public ArrayList<String> getWords() {
+        return words;
+    }
 
+    public List<String> getTarget_url() {
+        return target_url;
+    }
 
+    public int getTotalTargetUrls() {
+        return totalTargetUrls;
+    }
+
+    @Override
+    public String toString() {
+        return "Url{" +
+                "name='" + name + '\'' +
+                ", title='" + title + '\'' +
+                ", quote='" + quote + '\'' +
+                ", words=" + words +
+                ", target_url=" + target_url +
+                ", totalTargetUrls=" + totalTargetUrls +
+                '}';
+    }
 }
-
