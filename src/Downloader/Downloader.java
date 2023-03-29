@@ -103,7 +103,7 @@ public class Downloader extends UnicastRemoteObject implements DownloaderInterfa
                         i = i + 1;
                         countTokens = countTokens +1;
                     }
-                    sms_barrels = sms_barrels + s_quote;
+                    sms_barrels = sms_barrels + s_quote +" ; ";
                     sms_words = sms_words + i + " ; " + sms_words_aux;
                     sms_barrels = sms_barrels + sms_words;
 
@@ -119,7 +119,7 @@ public class Downloader extends UnicastRemoteObject implements DownloaderInterfa
                         sms_urls = sms_urls + "url_ap | " + link.attr("abs:href") + " ; ";
                     }
                     sms_barrels = sms_barrels + sms_urls;
-                    
+                    System.out.println(sms_barrels);
 
 
                     //FIXME: Multicast "server" connection ==> Enviar as words para os barrels
@@ -127,14 +127,14 @@ public class Downloader extends UnicastRemoteObject implements DownloaderInterfa
                     InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS);
 
                     //handshake with the size
-                    String sms_size = Integer.toString(sms_words.length());
+                    String sms_size = Integer.toString(sms_barrels.length());
                     byte[] buffer_handshake = sms_size.getBytes();
                     DatagramPacket handshake = new DatagramPacket(buffer_handshake, buffer_handshake.length, group, PORT);
                     multicast_socket.send(handshake);
 
 
                     //send mensagem
-                    byte[] buffer = sms_words.getBytes();
+                    byte[] buffer = sms_barrels.getBytes();
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, PORT);
                     multicast_socket.send(packet);
 

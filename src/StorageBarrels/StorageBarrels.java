@@ -10,6 +10,8 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import src.Classes.*;
 import sun.misc.Signal;
@@ -230,28 +232,27 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                     System.out.println("Received message packet from " + sms_packet.getAddress().getHostAddress() + ":" + sms_packet.getPort() + " with message:");
                     String sms = new String(sms_packet.getData(), 0, sms_packet.getLength());
 
-
+                    //System.out.println(sms);
                    //FIXME: Meter isto numa função
                     String words = null;String garbage = null;String name = null;
-                    String title = null;String quote = null;
+                    String title = "" ;String quote = "";
                     List<String> url_apointed = new ArrayList<>();
                     List<String> word = new ArrayList<>();
 
                     StringTokenizer tokens = new StringTokenizer(sms);
+                    //System.out.println(sms);
                     while (tokens.hasMoreElements()) {
                         words = tokens.nextToken();
                         if (words.equals("url")) {
                             garbage = tokens.nextToken();
                             name = tokens.nextToken();
                         }
-                        if(words.equals("title")) {
+                       /* if(words.equals("quote")){
                             garbage = tokens.nextToken();
-                            title = tokens.nextToken();
-                        }
-                        if(words.equals("quote")){
-                            garbage = tokens.nextToken();
-                            quote = tokens.nextToken();
-                        }
+                            while (!tokens.nextToken().equals("word_list")){
+                                quote = quote + tokens.nextToken();
+                            }
+                        }*/
                         if(words.equals("word")){
                             garbage = tokens.nextToken();
                             words = tokens.nextToken();
@@ -265,8 +266,22 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                                 url_apointed.add(words);
                         }
                     }
-                    Url url = new Url(name,title,quote,url_apointed);
-                    AddIndexInfo(url,index,word);
+
+                    String[] s = sms.split(";");
+                    title = s[2];
+                    title = title.replace("title | ","");
+
+                    String[] p = sms.split(";");
+                    quote = p[3];
+                    quote = quote.replace("qoute | ","");
+
+                    System.out.println(title);
+                    System.out.println(quote);
+
+
+                    Url url = new Url(name, title,quote,url_apointed);
+                    System.out.println(url.getName() + url.getTitle() + url.getQuote());
+                    //AddIndexInfo(url,index,word);
                     //////////////////////////////////////////////
 
                     /*
