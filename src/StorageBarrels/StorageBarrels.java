@@ -305,20 +305,13 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                         }
                         for(String s:wordsToIndex){
                             Word wAux = new Word(s);
-                            if(index.isEmpty()){
-                                HashSet<Url> UrlSet = new HashSet<Url>();
-                                UrlSet.add(url);
-                                index.put(wAux,UrlSet);
+                            if(!index.containsKey(wAux)){
+                                index.put(wAux,new HashSet<>());
                             }
-                            else if(index.containsKey(wAux)){
-                                index.get(wAux).add(url);
-                            }
-                            else{
-                                HashSet<Url> UrlSet = new HashSet<Url>();
-                                UrlSet.add(url);
-                                index.put(wAux,UrlSet);
-                            }
+                            index.get(wAux).add(url);
+
                         }
+
                         //escreve o hasmap
                         oos.writeObject(index);
 
