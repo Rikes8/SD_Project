@@ -34,16 +34,12 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
     private static  ConcurrentHashMap<Word,HashSet<Url>> index = new  ConcurrentHashMap<Word,HashSet<Url>>();
 
     //guardar para saber quais os link que aponta cada site, para depois meter no hashMap os que apontam para ele
-    private static ConcurrentHashMap<Url,ArrayList<String>> index_apontados = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<Url,ArrayList<String>> index_apontados = new ConcurrentHashMap<Url,ArrayList<String>>();
 
 
 
     //guardar info multicast (idk static)
-    private static ArrayList<String> links_array = new ArrayList<>();
-    private static ArrayList<String> words_array = new ArrayList<>();
-    private static String sup_link = "";
-    private static String title = "";
-    private static String quote = "";
+
 
     public StorageBarrels() throws RemoteException {
         super();
@@ -168,34 +164,7 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
         }
 
     }
-    //FIXME: Testes.Não devia estar static.
-    /*public static void AddIndexInfo(Url url, ConcurrentHashMap<Word,HashSet<Url>> index,List<String> words) {
-        Set<Word> key = index.keySet();
-        if(key.isEmpty()) {
-            for (String s : words) {
-                Word w = new Word(s);
-                HashSet<Url> w_set = new HashSet<Url>();
-                w_set.add(url);
-                index.put(w, w_set);
-            }
-        }
-        else {
-            for (Word k : key) {
-                for (String s : words) {
 
-                    if (k.getWord().equals(s)) {
-                        index.get(k).add(url);
-                    } else {
-                        Word w = new Word(s);
-                        HashSet<Url> w_set = new HashSet<Url>();
-                        w_set.add(url);
-                        index.put(w, w_set);
-                    }
-                }
-            }
-        }
-        printMap(index);
-    }*/
 
     public static void main(String args[]) throws IOException, NotBoundException, ServerNotActiveException {
         // usage: java HelloClient username
@@ -217,6 +186,25 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
         MulticastSocket multicast_socket = new MulticastSocket(PORT);
         InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS);
         multicast_socket.joinGroup(group);
+        try {
+            String file = "src/StorageBarrels/urls.obj";
+
+            FileInputStream fin = new FileInputStream(file);
+            ObjectInputStream in = new ObjectInputStream(fin);
+            if (file.length() != 0) {
+                while (true) {
+                    try {
+                        ConcurrentHashMap<Word,HashSet<Url>> in_url_obj = (ConcurrentHashMap<Word,HashSet<Url>>) in.readObject();
+                        index.putAll(in_url_obj);
+                    } catch (Exception e) {
+                        break; // eof
+                    }
+                }
+            printMap(index);
+        }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         Thread multicast = new Thread(() -> {
             try {
                 while (true) {
@@ -247,6 +235,12 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                     //System.out.println(sms);
                    //FIXME: Meter isto numa função
 
+                    ArrayList<String> links_array = new ArrayList<>();
+                    ArrayList<String> words_array = new ArrayList<>();
+                    String sup_link = "";
+                    String title = "";
+                    String quote = "";
+
                     int counter_pal = 0;
                     String[] aux;
                     String[] sms_parse = sms.split(";");
@@ -273,9 +267,6 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
 
 
 
-                    //System.out.println(words_array);
-
-
                     //FIXME: CRIAR OBJETO
 
 
@@ -287,31 +278,51 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                         FileOutputStream fos = new FileOutputStream(file);
                         ObjectOutputStream oos = new ObjectOutputStream(fos);
 
-                        FileInputStream fin = new FileInputStream(file);
-                        ObjectInputStream in = new ObjectInputStream(fin);
+                        Url url = new Url(sup_link, title,quote);
+                        index_apontados.put(url, links_array);
 
-                        if (file.length() != 0) {
-                            while (true) {
-                                try {
-                                    ConcurrentHashMap<Url,ArrayList<String>> in_url_obj = (ConcurrentHashMap<Url,ArrayList<String>>) in.readObject();
-                                    index_apontados.putAll(in_url_obj);
-                                } catch (Exception e) {
-                                    break; // eof
+                        if(!index_apontados.isEmpty()){
+                            for (Url key : index_apontados.keySet()) {
+                                ArrayList<String> sH = index_apontados.get(key);
+                                for(String s: sH){
+                                    if(s.equals(sup_link)){
+                                        url.addAimUrls(key.getName());
+                                    }
                                 }
                             }
                         }
-                        System.out.println(index_apontados);
 
-
-                        Url url = new Url(sup_link, title,quote,words_array);
-                        index_apontados.put(url, links_array);
-
+                        ArrayList<String> wordsToIndex = new ArrayList<>();
+                        if(words_array.size()>0){
+                            for(String s: words_array){
+                                if(wordsToIndex.isEmpty()){
+                                    wordsToIndex.add(s);
+                                }
+                                else if(!wordsToIndex.contains(s)){
+                                    wordsToIndex.add(s);
+                                }
+                            }
+                        }
+                        for(String s:wordsToIndex){
+                            Word wAux = new Word(s);
+                            if(index.isEmpty()){
+                                HashSet<Url> UrlSet = new HashSet<Url>();
+                                UrlSet.add(url);
+                                index.put(wAux,UrlSet);
+                            }
+                            else if(index.containsKey(wAux)){
+                                index.get(wAux).add(url);
+                            }
+                            else{
+                                HashSet<Url> UrlSet = new HashSet<Url>();
+                                UrlSet.add(url);
+                                index.put(wAux,UrlSet);
+                            }
+                        }
                         //escreve o hasmap
-                        oos.writeObject(index_apontados);
-
+                        oos.writeObject(index);
 
                         oos.close();
-                        in.close();
 
                     } catch (FileNotFoundException e) {
                         throw new RuntimeException(e);
@@ -327,8 +338,8 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                     //////////////////////////////////////////////
 
 
-                    words_array.clear();
-                    links_array.clear();
+                    /*words_array.clear();
+                    links_array.clear();*/
                     //FIXME: Tratar da mensagem e meter para o hashmap
                 }
 

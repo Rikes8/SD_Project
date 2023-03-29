@@ -1,6 +1,8 @@
 package src.Classes;
 
-public class Word {
+import java.io.Serializable;
+
+public class Word implements Serializable {
     private final String word;
     private int count;
 

@@ -9,14 +9,14 @@ public class Url implements Serializable {
     private String name;
     private String title;
     private String quote;
-    private ArrayList<String> words;
+    private ArrayList<String> urlTarget;
     private int totalTargetUrls;
 
-    public Url(String name, String title, String quote, ArrayList<String> words) {
+    public Url(String name, String title, String quote) {
         this.name = name;
         this.title = title;
         this.quote = quote;
-        this.words = words;
+        this.urlTarget = new ArrayList<String>();
         this.totalTargetUrls = 0;
     }
 
@@ -37,12 +37,8 @@ public class Url implements Serializable {
         return quote;
     }
 
-    public ArrayList<String> getWords() {
-        return words;
-    }
-
-    public List<String> getTarget_url() {
-        return target_url;
+    public ArrayList<String> getTarget_url() {
+        return urlTarget;
     }
 
     public int getTotalTargetUrls() {
@@ -55,9 +51,6 @@ public class Url implements Serializable {
                 "name='" + name + '\'' +
                 ", title='" + title + '\'' +
                 ", quote='" + quote + '\'' +
-                ", words=" + words +
-                ", target_url=" + target_url +
-                ", totalTargetUrls=" + totalTargetUrls +
                 '}';
     }
 }
