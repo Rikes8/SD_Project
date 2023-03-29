@@ -1,7 +1,13 @@
     package src.Queue;
 
+    import src.Classes.User;
+
     import java.net.*;
     import java.io.*;
+    import java.nio.file.Files;
+    import java.rmi.RemoteException;
+    import java.util.ArrayList;
+    import java.util.Scanner;
     import java.util.SimpleTimeZone;
     import java.util.StringTokenizer;
     import java.util.concurrent.*;
@@ -22,15 +28,61 @@
         private static int serverPort = 6000;
 
         //LinkedBlockingQueue does not need size
-        public static LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<>();;
+        public static LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<>();
+        public static ArrayList<String> cache = new ArrayList<>();
 
 
 
         public static void main(String args[]){
             int numero=0;
+            String file_info = "";
+            String file_queue = "src/Queue/queue_cache.txt";
             try (ServerSocket listenSocket = new ServerSocket(serverPort)) {
                 //System.out.println("A escuta no porto 6000");
                 System.out.println("LISTEN SOCKET=" + listenSocket);
+
+                File f = new File(file_queue);
+                if (f.exists()) {
+                    //ler info do ficheiro
+                    try{
+                        FileReader freader = new FileReader(f);
+                        BufferedReader reader = new BufferedReader(freader);
+
+                        while ((file_info = reader.readLine()) != null){
+                            queue.add(file_info);
+                        }
+
+                        reader.close();
+                    }catch (IOException e){
+                    }
+                }else{
+                    f.createNewFile();
+                }
+                System.out.println(queue);
+
+
+                Runtime.getRuntime().addShutdownHook(new Thread() {
+                    public void run() {
+                        String file_queue = "src/Queue/queue_cache.txt";
+                        //guardar info no ficheiro
+                        try{
+                            FileWriter file = new FileWriter(file_queue);
+                            while (!queue.isEmpty()){
+                                cache.add(queue.poll());
+                            }
+                            for(String c : cache){
+                                System.out.println(c);
+                                file.write(c + "\n");
+                            }
+                            file.close();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                        System.out.println("Queue ending...");
+                    }
+                });
+
+
                 while(true) {
                     Socket clientSocket = listenSocket.accept(); // BLOQUEANTE
                     //System.out.println("CLIENT_SOCKET (created at accept())="+clientSocket);
@@ -110,10 +162,10 @@
 
 
             } catch(IOException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
                 //System.out.println("aqui2");
             }catch(InterruptedException e){
-                e.printStackTrace();
+               // e.printStackTrace();
                 //System.out.println("aqui3");
             }
         }
