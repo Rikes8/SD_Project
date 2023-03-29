@@ -55,121 +55,117 @@ public class Downloader extends UnicastRemoteObject implements DownloaderInterfa
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
             DataInputStream in = new DataInputStream(socket.getInputStream());
             MulticastSocket multicast_socket = null;
-            try{
-                multicast_socket = new MulticastSocket();
 
-                while (true){
+            multicast_socket = new MulticastSocket();
+
+            while (true){
+
+                int count_urls = 0;
+                String url = "";
+
+
+                //FIXME: TCP connection == FAZER PEDIDO
+                String pedido = "pedido";
+                out.writeUTF(pedido);
+
+                url = in.readUTF();
+
+
+                String sms_urls = "type | url_list ; item_count | ";
+                String sms_barrels = "type | url ; ";
+                String s_quote = " qoute | ";
+                String s_title = "title | ";
+                String sms_words = "word_list ; item_count | ";
+                String sms_words_aux = "";
+                List<String> repeated = new ArrayList<>();
+
+                try{
+                    //FIXME: JSOUP
+                    Document doc = Jsoup.connect(url).get();
+                    StringTokenizer tokens = new StringTokenizer(doc.text());
+
+                    sms_barrels = sms_barrels + url + " ; ";
+                    sms_barrels = sms_barrels + s_title;
+
+                    String title = doc.title();
+                    sms_barrels = sms_barrels + title + ";";
+
                     try{
-                        int count_urls = 0;
-                        String url = "";
+                        int titleSize = title.length();
+                        String quote = doc.text().substring(titleSize+1,titleSize+50);
+                        s_quote = s_quote+quote;
+                        sms_barrels = sms_barrels + s_quote +" ; ";
 
-
-                        //FIXME: TCP connection == FAZER PEDIDO
-                        String pedido = "pedido";
-                        out.writeUTF(pedido);
-
-                        url = in.readUTF();
-
-
-                        String sms_urls = "type | url_list ; item_count | ";
-                        String sms_barrels = "type | url ; ";
-                        String s_quote = " qoute | ";
-                        String s_title = "title | ";
-                        String sms_words = "word_list ; item_count | ";
-                        String sms_words_aux = "";
-                        List<String> repeated = new ArrayList<>();
-
-
-                        //FIXME: JSOUP
-                        Document doc = Jsoup.connect(url).get();
-                        StringTokenizer tokens = new StringTokenizer(doc.text());
-
-                        sms_barrels = sms_barrels + url + " ; ";
-                        sms_barrels = sms_barrels + s_title;
-
-                        String title = doc.title();
-                        sms_barrels = sms_barrels + title + ";";
-
-                        try{
-                            int titleSize = title.length();
-                            String quote = doc.text().substring(titleSize+1,titleSize+50);
-                            s_quote = s_quote+quote;
-                            sms_barrels = sms_barrels + s_quote +" ; ";
-
-                        }catch(IndexOutOfBoundsException e){
-                            String quote = doc.text();
-                            s_quote = s_quote + quote;
-                            sms_barrels = sms_barrels + s_quote + ";";
-                        }
-
-                        //FIXME: Adiciona as words à mensagem
-                        int i = 0;
-                        String word = null;
-                        int countTokens = 0;
-                        while (tokens.hasMoreElements() && countTokens++ < 100) {
-                            word = tokens.nextToken();
-                            sms_words_aux = sms_words_aux + "word | " +word.toLowerCase() + " ; ";
-                            i = i + 1;
-                            countTokens = countTokens +1;
-                        }
-
-                        sms_words = sms_words + i + " ; " + sms_words_aux;
-                        sms_barrels = sms_barrels + sms_words;
-
-                        //FIXME: Conta o numero de links encontrados
-                        Elements links = doc.select("a[href]");
-                        for (Element link : links){
-                            count_urls ++;
-                        }
-
-                        //FIXME: Adiciona os links à mensagem
-                        sms_urls = sms_urls + count_urls + " ; ";
-                        for (Element link : links){
-                            sms_urls = sms_urls + "url_ap | " + link.attr("abs:href") + " ; ";
-                        }
-                        sms_barrels = sms_barrels + sms_urls;
-                        System.out.println(sms_barrels);
-
-
-                        //FIXME: Multicast "server" connection ==> Enviar as words para os barrels
-                        //while(true){
-                        InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS);
-
-                        //handshake with the size
-                        String sms_size = Integer.toString(sms_barrels.length());
-                        byte[] buffer_handshake = sms_size.getBytes();
-                        DatagramPacket handshake = new DatagramPacket(buffer_handshake, buffer_handshake.length, group, PORT);
-                        multicast_socket.send(handshake);
-
-
-                        //send mensagem
-                        byte[] buffer = sms_barrels.getBytes();
-                        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, PORT);
-                        multicast_socket.send(packet);
-
-                        //try { sleep((long) (Math.random() * SLEEP_TIME)); } catch (InterruptedException e) { }
-
-                        //===============================================================================
-                        //==========================   TCP   ==================================
-                        //===============================================================================
-
-                        //FIXME: TCP connection ==> Envia urls para a Queue
-
-                        out.writeUTF(sms_urls);
-                    }catch(SSLHandshakeException e){
-                        System.out.println("Link invalido");
+                    }catch(IndexOutOfBoundsException e){
+                        String quote = doc.text();
+                        s_quote = s_quote + quote;
+                        sms_barrels = sms_barrels + s_quote + ";";
                     }
+
+                    //FIXME: Adiciona as words à mensagem
+                    int i = 0;
+                    String word = null;
+                    int countTokens = 0;
+                    while (tokens.hasMoreElements() && countTokens++ < 100) {
+                        word = tokens.nextToken();
+                        sms_words_aux = sms_words_aux + "word | " +word.toLowerCase() + " ; ";
+                        i = i + 1;
+                        countTokens = countTokens +1;
+                    }
+
+                    sms_words = sms_words + i + " ; " + sms_words_aux;
+                    sms_barrels = sms_barrels + sms_words;
+
+                    //FIXME: Conta o numero de links encontrados
+                    Elements links = doc.select("a[href]");
+                    for (Element link : links){
+                        count_urls ++;
+                    }
+
+                    //FIXME: Adiciona os links à mensagem
+                    sms_urls = sms_urls + count_urls + " ; ";
+                    for (Element link : links){
+                        sms_urls = sms_urls + "url_ap | " + link.attr("abs:href") + " ; ";
+                    }
+                    sms_barrels = sms_barrels + sms_urls;
+                    System.out.println(sms_barrels);
+                }catch (IOException e) {
+                    //e.printStackTrace();
                 }
 
-            }catch (IOException e) {
-                throw new RuntimeException(e);
-            }finally {
-                multicast_socket.close();
+
+                //FIXME: Multicast "server" connection ==> Enviar as words para os barrels
+                //while(true){
+                InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS);
+
+                //handshake with the size
+                String sms_size = Integer.toString(sms_barrels.length());
+                byte[] buffer_handshake = sms_size.getBytes();
+                DatagramPacket handshake = new DatagramPacket(buffer_handshake, buffer_handshake.length, group, PORT);
+                multicast_socket.send(handshake);
+
+
+                //send mensagem
+                byte[] buffer = sms_barrels.getBytes();
+                DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, PORT);
+                multicast_socket.send(packet);
+
+                //try { sleep((long) (Math.random() * SLEEP_TIME)); } catch (InterruptedException e) { }
+
+                //===============================================================================
+                //==========================   TCP   ==================================
+                //===============================================================================
+
+                //FIXME: TCP connection ==> Envia urls para a Queue
+
+                out.writeUTF(sms_urls);
             }
         }catch (UnknownHostException e) {
-            System.out.println("Sock:" + e.getMessage());
+            System.out.println("Sock:" );
+            e.getStackTrace();
         } catch (EOFException e) {
-            System.out.println("EOF:" + e.getMessage());
+            System.out.println("EOF:" );
+            e.getStackTrace();
         } catch (IOException e) {
             System.out.println("Queue is not active!");
             System.exit(0);

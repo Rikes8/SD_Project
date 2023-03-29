@@ -109,12 +109,12 @@
                 }
 
 
-            } catch(EOFException e) {
-                System.out.println("EOF:" + e);
             } catch(IOException e) {
-                System.out.println(" ");
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
+                //System.out.println("aqui2");
+            }catch(InterruptedException e){
+                e.printStackTrace();
+                //System.out.println("aqui3");
             }
         }
 

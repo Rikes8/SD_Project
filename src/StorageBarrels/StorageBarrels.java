@@ -261,7 +261,7 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                         }
                         if(words.equals("url_ap")){
                             garbage = tokens.nextToken();
-                            words = tokens.nextToken();
+                            //words = tokens.nextToken();
                             if(!url_apointed.contains(words))
                                 url_apointed.add(words);
                         }
