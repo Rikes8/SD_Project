@@ -33,6 +33,15 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
     //FIXME: Penso que não devia estar static
     private static  ConcurrentHashMap<Word,HashSet<Url>> index = new  ConcurrentHashMap<Word,HashSet<Url>>();
 
+
+
+    //guardar info multicast (idk static)
+    private static ArrayList<String> links_array = new ArrayList<>();
+    private static ArrayList<String> words_array = new ArrayList<>();
+    private static String sup_link = "";
+    private static String title = "";
+    private static String quote = "";
+
     public StorageBarrels() throws RemoteException {
         super();
         this.id = -1;
@@ -239,48 +248,35 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                     List<String> url_apointed = new ArrayList<>();
                     List<String> word = new ArrayList<>();
 
-                    StringTokenizer tokens = new StringTokenizer(sms);
-                    //System.out.println(sms);
-                    while (tokens.hasMoreElements()) {
-                        words = tokens.nextToken();
-                        if (words.equals("url")) {
-                            garbage = tokens.nextToken();
-                            name = tokens.nextToken();
-                        }
-                       /* if(words.equals("quote")){
-                            garbage = tokens.nextToken();
-                            while (!tokens.nextToken().equals("word_list")){
-                                quote = quote + tokens.nextToken();
-                            }
-                        }*/
-                        if(words.equals("word")){
-                            garbage = tokens.nextToken();
-                            words = tokens.nextToken();
-                            if(!word.contains(words))
-                                word.add(words);
-                        }
-                        if(words.equals("url_ap")){
-                            garbage = tokens.nextToken();
-                            //words = tokens.nextToken();
-                            if(!url_apointed.contains(words))
-                                url_apointed.add(words);
+                    System.out.println("-->" + sms);
+
+                    int counter_pal = 0;
+                    String[] aux;
+                    String[] sms_parse = sms.split(";");
+                    for (String type: sms_parse){
+                        aux = type.split("\\|");
+                        //System.out.println(aux[0] + "---" + aux[1]);
+                        if (aux[0].contains("url ")){
+                            sup_link = aux[1];
+                            //System.out.println(sup_link);
+                        }else if(aux[0].contains("title")){
+                            title = aux[1];
+                            //System.out.println(title);
+                        } else if (aux[0].contains("qoute")) {
+                            quote = aux[1];
+                            //System.out.println(quote);
+                        }else if (aux[0].contains("word ")) {
+                            words_array.add(aux[1].replace(" ", ""));
+                            //System.out.println(aux[1]);
+                        } else if (aux[0].contains("url_ap")) {
+                            links_array.add(aux[1].replace(" ", ""));
+                            //System.out.println(aux[1]);
                         }
                     }
 
-                    String[] s = sms.split(";");
-                    title = s[2];
-                    title = title.replace("title | ","");
-
-                    String[] p = sms.split(";");
-                    quote = p[3];
-                    quote = quote.replace("qoute | ","");
-
-                    System.out.println(title);
-                    System.out.println(quote);
-
-
-                    Url url = new Url(name, title,quote,url_apointed);
-                    System.out.println(url.getName() + url.getTitle() + url.getQuote());
+                    //FIXME: CRIAR OBJETO
+                    //Url url = new Url(sup_link, title,quote,url_apointed);
+                    //System.out.println(url.getName() + url.getTitle() + url.getQuote());
                     //AddIndexInfo(url,index,word);
                     //////////////////////////////////////////////
 

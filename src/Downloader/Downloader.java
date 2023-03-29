@@ -75,7 +75,7 @@ public class Downloader extends UnicastRemoteObject implements DownloaderInterfa
                 String sms_barrels = "type | url ; ";
                 String s_quote = " qoute | ";
                 String s_title = "title | ";
-                String sms_words = "word_list ; item_count | ";
+                String sms_words = "type | word_list ; item_count | ";
                 String sms_words_aux = "";
                 List<String> repeated = new ArrayList<>();
 
@@ -84,7 +84,7 @@ public class Downloader extends UnicastRemoteObject implements DownloaderInterfa
                     Document doc = Jsoup.connect(url).get();
                     StringTokenizer tokens = new StringTokenizer(doc.text());
 
-                    sms_barrels = sms_barrels + url + " ; ";
+                    sms_barrels = sms_barrels + "url | " +url + " ; ";
                     sms_barrels = sms_barrels + s_title;
 
                     String title = doc.title();
