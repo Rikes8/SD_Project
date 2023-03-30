@@ -181,9 +181,11 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
                 //System.out.println(entry.getKey() + " -> " + entry.getValue());
                 if (entry.getKey() == id){
                     IpBarrels.remove(id);
+
                 }
             }
 
+            barrels.remove(id);
             printStats(IpDownloaders,IpBarrels,statistics);
 
 
@@ -196,7 +198,7 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
                 }
             }
 
-
+            downloaders.remove(id);
             printStats(IpDownloaders, IpBarrels,statistics);
 
         }else if(str[0].equals("-1c")){
@@ -206,6 +208,8 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
                     IpClients.remove(id);
                 }
             }
+            clients.remove(id);
+
         } else if (str[0].equals("register")) {
             username = str[1];
             password = str[2];

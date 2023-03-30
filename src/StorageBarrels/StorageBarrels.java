@@ -31,7 +31,7 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
     private int id;
     //private String file = "src/StorageBarrels/file.obj";
 
-    //static HashMap<Integer,User> usersBackup = new HashMap<Integer,User>();
+    
     private ArrayList<User> users = new ArrayList<>();
 
 
@@ -140,35 +140,73 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
 
         } else if (str[0].equals("search")) {
 
+
+            List<Url> to_delete = new ArrayList<>();
+            List<Url> repetidos = new ArrayList<>();
+
+            System.out.println("entrei!!!");
             for (int j = 1; j < str.length; j++){
 
                 Set<Word> key = index.keySet();
 
                 for (Word k : key) {
-                    if (k.getWord().equals(str[j])) {
-                        message = message + k.getWord() + "\n";
+                    if (k.getWord().equalsIgnoreCase(str[j])) {
+                        HashSet<Url> ul_aux = index.get(k);
+                        if (repetidos.isEmpty()){
+                            for (Url u: ul_aux) {
+                                repetidos.add(u);
 
-                        HashSet<Url> ul = index.get(k);
-                        for (Url u : ul){
-                            message = message + u.getName() + "\n" + u.getTitle() + "\n" + u.getQuote() + "\n\n";
+                            }
+                        }else{
+
+                            for (Url aux: repetidos) {
+
+                                boolean flag = false;
+                                for (Url u : ul_aux) {
+                                    if (u.getName().equals(aux.getName())) {
+                                        flag = true;
+                                        break;
+                                    }
+
+                                }
+                                if (!flag) {
+                                    to_delete.add(aux);
+                                }
+                            }
+                            for (Url rep: repetidos) {
+                                for (Url del : to_delete){
+                                    if (rep.getName().equals(del.getName())){
+                                        repetidos.remove(rep);
+                                    }
+                                }
+                            }
+
                         }
-                        message = message + "\n";
-                    }
-                }
 
+                    }
+
+                }
             }
+
+
+            //ordenar
+
+
+
+
+
+
+
+            //System.out.println(repetidos.size());
+
+            for (int i = 0; i< repetidos.size(); i++){
+                message = message + repetidos.get(i).getName() +"\n\n";
+            }
+
+
+
             return message;
 
-            /*//FIXME:SO PARA TESTAR
-            String[] teste = {"teste" , "http://uc.pt" , "teste2", "http://sapo.pt"};
-            if (s.equals(teste[0])){
-                //System.out.println("in");
-                return teste[1];
-            }
-            if (s.equals(teste[2])){
-                //System.out.println("in");
-                return teste[3];
-            }*/
         }
 
 
@@ -363,8 +401,8 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                         }
                     }
 
-                    System.out.println("debug2");
-                    printMap(index);
+                    //System.out.println("debug2");
+                    //printMap(index);
 
 
                     /*    //escreve o hasmap
