@@ -60,6 +60,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
                 System.out.println(h.ShareInfoToServer(c.id, ClientInput));
             }
         } catch (Exception e) {
+            e.printStackTrace();
             System.out.println("SearchModule is not activated, try again later!");
         }
     }

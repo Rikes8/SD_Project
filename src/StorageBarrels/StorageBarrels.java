@@ -19,6 +19,11 @@ import sun.misc.Signal;
 //TODO:=====================ALERT!!!===============================
 //downloader avisa que vai enviar pacote comn bytes, barrelsavisam quer receberem e depois acks
 
+
+//index.get para ir buscar a palavra -> retorna arraylist de url
+//array.add(URL)
+
+
 public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInterface, Serializable{
 
     private static String MULTICAST_ADDRESS = "224.3.2.1";
@@ -48,8 +53,7 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
 
     //FIXME: RMI Callback -> INPUT QUE VEM DO CLIENTE E QUE REQUERE IR BUSCAR INFO AO BARREL
     public String ShareInfoToBarrel(String s) throws RemoteException {
-
-
+        String message ="";
         String[] str= s.split(" ");
         if (str[0].equals("register")) {
             //File file = new File("src/StorageBarrels/file.obj");
@@ -133,19 +137,42 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+
+        } else if (str[0].equals("search")) {
+
+            for (int j = 1; j < str.length; j++){
+
+                Set<Word> key = index.keySet();
+
+                for (Word k : key) {
+                    if (k.getWord().equals(str[j])) {
+                        message = message + k.getWord() + "\n";
+
+                        HashSet<Url> ul = index.get(k);
+                        for (Url u : ul){
+                            message = message + u.getName() + "\n" + u.getTitle() + "\n" + u.getQuote() + "\n\n";
+                        }
+                        message = message + "\n";
+                    }
+                }
+
+            }
+            return message;
+
+            /*//FIXME:SO PARA TESTAR
+            String[] teste = {"teste" , "http://uc.pt" , "teste2", "http://sapo.pt"};
+            if (s.equals(teste[0])){
+                //System.out.println("in");
+                return teste[1];
+            }
+            if (s.equals(teste[2])){
+                //System.out.println("in");
+                return teste[3];
+            }*/
         }
 
 
-        //FIXME:SO PARA TESTAR
-        String[] teste = {"teste" , "http://uc.pt" , "teste2", "http://sapo.pt"};
-        if (s.equals(teste[0])){
-            //System.out.println("in");
-            return teste[1];
-        }
-        if (s.equals(teste[2])){
-            //System.out.println("in");
-            return teste[3];
-        }
+
 
         return "RECEBER INFO DO BARREL";
     }
@@ -153,6 +180,7 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
     //FIXME: Testes.Não que não devia estar static.
    public static void printMap( ConcurrentHashMap<Word, HashSet<Url>> index)
     {
+        System.out.println("entrei");
         Set<Word> key = index.keySet();
         Set<Url> url;
         for(Word e: key){
@@ -162,6 +190,7 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                 System.out.println(u.getName());
             }
         }
+        System.out.println("sai");
 
     }
 
@@ -187,11 +216,13 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
         InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS);
         multicast_socket.joinGroup(group);
         try {
-            String file = "src/StorageBarrels/urls.obj";
+            String file_c = "src/StorageBarrels/urls.obj";
+            File file = new File(file_c);
 
-            FileInputStream fin = new FileInputStream(file);
-            ObjectInputStream in = new ObjectInputStream(fin);
-            if (file.length() != 0) {
+            if (file.exists()) {
+                FileInputStream fin = new FileInputStream(file);
+                ObjectInputStream in = new ObjectInputStream(fin);
+
                 while (true) {
                     try {
                         ConcurrentHashMap<Word,HashSet<Url>> in_url_obj = (ConcurrentHashMap<Word,HashSet<Url>>) in.readObject();
@@ -200,8 +231,9 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                         break; // eof
                     }
                 }
-            printMap(index);
-        }
+                printMap(index);
+            }
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -248,7 +280,7 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                         aux = type.split("\\|");
                         //System.out.println(aux[0] + "---" + aux[1]);
                         if (aux[0].contains("url ")){
-                            sup_link = aux[1];
+                            sup_link = aux[1].replace(" ", "");
                             //System.out.println(sup_link);
                         }else if(aux[0].contains("title")){
                             title = aux[1];
@@ -266,53 +298,76 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                     }
 
 
-
                     //FIXME: CRIAR OBJETO
-
-
-
                     //File file = new File("src/StorageBarrels/file.obj");
+
                     String file = "src/StorageBarrels/urls.obj";
 
-                    try {
+                    /*try {
                         FileOutputStream fos = new FileOutputStream(file);
-                        ObjectOutputStream oos = new ObjectOutputStream(fos);
+                        ObjectOutputStream oos = new ObjectOutputStream(fos);*/
 
-                        Url url = new Url(sup_link, title,quote);
-                        index_apontados.put(url, links_array);
+                    Url url = new Url(sup_link, title,quote);
 
-                        if(!index_apontados.isEmpty()){
-                            for (Url key : index_apontados.keySet()) {
-                                ArrayList<String> sH = index_apontados.get(key);
-                                for(String s: sH){
-                                    if(s.equals(sup_link)){
-                                        url.addAimUrls(key.getName());
-                                    }
-                                }
+                    /*for (int i = 0; i < words_array.size(); i++){
+                        HashSet<Url> set = index.get(words_array[i]);
+                    }*/
+
+                    //TODO AQUIIIIIIIIIIIIIIII
+                    index_apontados.put(url, links_array);
+
+
+
+                    for (Url key : index_apontados.keySet()) {
+                        ArrayList<String> sH = index_apontados.get(key);
+                        for(String s: sH){
+                            //System.out.println(s +"  " +sup_link);
+                            if(s.equals(sup_link)){
+                                //System.out.println("entrei");
+                                url.addAimUrls(key.getName());
                             }
                         }
+                    }
 
-                        ArrayList<String> wordsToIndex = new ArrayList<>();
-                        if(words_array.size()>0){
-                            for(String s: words_array){
-                                if(wordsToIndex.isEmpty()){
-                                    wordsToIndex.add(s);
-                                }
-                                else if(!wordsToIndex.contains(s)){
-                                    wordsToIndex.add(s);
-                                }
+
+                    ArrayList<String> wordsToIndex = new ArrayList<>();
+                    if(words_array.size()>0){
+                        for(String s: words_array){
+                            if(wordsToIndex.isEmpty()){
+                                wordsToIndex.add(s);
+                            }
+                            else if(!wordsToIndex.contains(s)){
+                                wordsToIndex.add(s);
                             }
                         }
-                        for(String s:wordsToIndex){
-                            Word wAux = new Word(s);
-                            if(!index.containsKey(wAux)){
-                                index.put(wAux,new HashSet<>());
+                    }
+
+                    //System.out.println("debug1");
+                    //System.out.println(wordsToIndex);
+
+                    for(String s:wordsToIndex) {
+                        Word wAux = new Word(s);
+
+                        Set<Word> key = index.keySet();
+                        boolean flag = false;
+                        for (Word k : key) {
+                            if (k.getWord().equals(s)) {
+                                index.get(k).add(url);
+                                flag = true;
                             }
-                            index.get(wAux).add(url);
-
                         }
+                        if(flag == false){
+                            HashSet<Url> ul = new HashSet<>();
+                            ul.add(url);
+                            index.put(wAux, ul);
+                        }
+                    }
 
-                        //escreve o hasmap
+                    System.out.println("debug2");
+                    printMap(index);
+
+
+                    /*    //escreve o hasmap
                         oos.writeObject(index);
 
                         oos.close();
@@ -321,19 +376,15 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                         throw new RuntimeException(e);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
-                    }
+                    }*/
 
 
 
 
-                    //System.out.println(url.getName() + url.getTitle() + url.getQuote());
-                    //AddIndexInfo(url,index,word);
-                    //////////////////////////////////////////////
 
 
-                    /*words_array.clear();
-                    links_array.clear();*/
-                    //FIXME: Tratar da mensagem e meter para o hashmap
+                    words_array.clear();
+                    links_array.clear();
                 }
 
             } finally {

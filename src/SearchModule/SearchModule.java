@@ -1,7 +1,6 @@
 package src.SearchModule;
 
 import java.io.*;
-import java.lang.reflect.Proxy;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.rmi.*;
@@ -9,8 +8,6 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.*;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 
 import src.Client.Client;
@@ -30,6 +27,7 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
 
     private static final long serialVersionUID = 1L;
 
+    private int counter;
 
     private int client_id;
     private int flag = client_id;
@@ -44,6 +42,8 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
 
     static ArrayList<DownloaderInterface> downloaders = new ArrayList<>();
     static HashMap<Integer,String> IpDownloaders = new HashMap<>();
+
+
 
 
 
@@ -118,6 +118,7 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
 
     public String ShareInfoToServer(int id, String s) throws RemoteException {
         String message = "";
+
         String[] str= s.split(" ");
         String username = "";
         String password = "";
@@ -144,9 +145,24 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
             message = "link indexado!";
 
         }else if(str[0].equals("search")){
+            System.out.println("entrei");
+            String mm = "";
+            for (String value : str) {
+                mm = mm + value +" ";
+            }
+            System.out.println(mm);
 
-            //FIXME: VER QUAL BARREL DISPONIVEL PARA PESQUISA (PODE-SE USAR ID)
-            message = barrels.get(0).ShareInfoToBarrel(str[1]);
+            if (counter < barrels.size()){
+                message = barrels.get(counter).ShareInfoToBarrel(mm);
+                counter++;
+            }else{
+                counter = 0;
+                message = barrels.get(counter).ShareInfoToBarrel(mm);
+                counter ++;
+            }
+
+
+
 
         }else if(str[0].equals("stats")){
 

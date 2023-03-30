@@ -21,7 +21,7 @@ public class Url implements Serializable {
     }
 
     public void addAimUrls(String url){
-        //this.target_url.add(url);
+        this.urlTarget.add(url);
         this.totalTargetUrls+=1;
     }
 
