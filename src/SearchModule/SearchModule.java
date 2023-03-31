@@ -35,6 +35,8 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
     static ArrayList<ClientInterface> clients = new ArrayList<>();
     static HashMap<Integer,String> IpClients = new HashMap<>();
 
+
+
     static HashMap<Integer,String> statistics = new HashMap<>();
 
     static ArrayList<BarrelsInterface> barrels = new ArrayList<>();
@@ -108,7 +110,7 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
 
         for (Map.Entry<Integer, String> entry : statistics.entrySet()) {
             if(entry.getValue().equals("true")){
-                System.out.println("entrei");
+                //System.out.println("entrei");
                 clients.get(entry.getKey()).print_on_client(message);
             }
         }
@@ -144,7 +146,18 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
 
             message = "link indexado!";
 
-        }else if(str[0].equals("search")){
+        }else if(str[0].equals("search") || str[0].equals("conn")){
+
+            if (str[0].equals("conn")){
+                for (Map.Entry<Integer, String> entry : IpClients.entrySet()) {
+                    //System.out.println(entry.getKey() + " -> " + entry.getValue());
+                    if (entry.getKey() == id){
+                        IpClients.remove(id);
+                    }
+                }
+                clients.remove(id);
+            }
+
             System.out.println("entrei");
             String mm = "";
             for (String value : str) {

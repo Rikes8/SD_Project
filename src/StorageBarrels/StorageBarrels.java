@@ -31,7 +31,7 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
     private int id;
     //private String file = "src/StorageBarrels/file.obj";
 
-    
+
     private ArrayList<User> users = new ArrayList<>();
 
 
@@ -40,6 +40,8 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
 
     //guardar para saber quais os link que aponta cada site, para depois meter no hashMap os que apontam para ele
     private static ConcurrentHashMap<Url,ArrayList<String>> index_apontados = new ConcurrentHashMap<Url,ArrayList<String>>();
+
+    private static ConcurrentHashMap<String,ArrayList<String>> index_apontados_cpy = new ConcurrentHashMap<String,ArrayList<String>>();
 
 
 
@@ -190,7 +192,39 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
 
 
             //ordenar
+            //private static ConcurrentHashMap<Url,ArrayList<String>> index_apontados = new ConcurrentHashMap<Url,ArrayList<String>>();
 
+            ConcurrentHashMap<Url,Integer> to_sort = new ConcurrentHashMap<Url,Integer>();
+            List<String> relevancia = new ArrayList<>();
+            int rev ;
+
+
+            for (Url u:repetidos) {
+                for (Map.Entry<Url, ArrayList<String>> entry : index_apontados.entrySet()) {
+                    Url url = entry.getKey();
+                    relevancia = entry.getValue();
+                    rev = relevancia.size();
+
+                    if (url.getName().equalsIgnoreCase(u.getName())){
+                        to_sort.put(u,rev);
+                    }
+                }
+            }
+
+            List<Map.Entry<Url, Integer> > list = new LinkedList<Map.Entry<Url, Integer> >(to_sort.entrySet());
+
+            // Sort the list using lambda expression
+            Collections.sort(list, Comparator.comparing(Map.Entry::getValue));
+
+            HashMap<Url, Integer> temp = new LinkedHashMap<Url, Integer>();
+            for (Map.Entry<Url, Integer> aa : list) {
+                temp.put(aa.getKey(), aa.getValue());
+            }
+
+
+            for (Map.Entry<Url, Integer> en : temp.entrySet()) {
+                message = message + "Key = " + en.getKey() + ", Value = " + en.getValue() +"\n\n";
+            }
 
 
 
@@ -199,12 +233,28 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
 
             //System.out.println(repetidos.size());
 
-            for (int i = 0; i< repetidos.size(); i++){
-                message = message + repetidos.get(i).getName() +"\n\n";
+            /*for (int i = 0; i< temp.size(); i++){
+                message = message + temp.get(i). +"\n\n";
+            }*/
+
+
+
+            return message;
+
+        }else if(str[0].equals("conn")){
+            //ConcurrentHashMap<String,ArrayList<String>> index_apontados_cpy = new ConcurrentHashMap<Strin
+            System.out.println("entei");
+
+            for (Map.Entry<String, ArrayList<String>> entry : index_apontados_cpy.entrySet()) {
+                String url = entry.getKey();
+                if (url.equalsIgnoreCase(str[1])){
+
+                    message = message + entry.getValue() + "\n\n";
+                    break;
+                }
+
             }
-
-
-
+            System.out.println("saia");
             return message;
 
         }
@@ -351,8 +401,24 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                         HashSet<Url> set = index.get(words_array[i]);
                     }*/
 
-                    //TODO AQUIIIIIIIIIIIIIIII
+                    //TODO LA DENTRO
                     index_apontados.put(url, links_array);
+                    ArrayList<String> auxlinks = new ArrayList<>();
+                    for (String link : links_array) {
+
+                        if (index_apontados_cpy.get(link) == null) {
+                            auxlinks.add(url.getName());
+                            index_apontados_cpy.put(link, auxlinks);
+                        } else {
+                            auxlinks = index_apontados_cpy.get(link);
+                            if (!auxlinks.contains(url.getName())) {
+                                auxlinks.add(link);
+                                index_apontados_cpy.put(link, auxlinks);
+                            }
+
+                        }
+                    }
+
 
 
 
