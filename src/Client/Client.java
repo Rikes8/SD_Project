@@ -6,6 +6,7 @@ import java.rmi.server.*;
 import java.io.*;
 import src.SearchModule.ServerInterface;
 
+
 public class Client extends UnicastRemoteObject implements ClientInterface {
 
     private int id;

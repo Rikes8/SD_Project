@@ -419,9 +419,6 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                         }
                     }
 
-
-
-
                     for (Url key : index_apontados.keySet()) {
                         ArrayList<String> sH = index_apontados.get(key);
                         for(String s: sH){

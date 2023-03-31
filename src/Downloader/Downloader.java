@@ -140,10 +140,10 @@ public class Downloader extends UnicastRemoteObject implements DownloaderInterfa
 
                 //handshake with the size
                 int UdpPort = sms_barrels.length();
-                String sms_size = identifier + ";" +Integer.toString(sms_barrels.length());
-                byte[] buffer_handshake = sms_size.getBytes();
-                DatagramPacket handshake = new DatagramPacket(buffer_handshake, buffer_handshake.length, group, PORT);
-                multicast_socket.send(handshake);
+                String sms_size = identifier + ";" + Integer.toString(sms_barrels.length());
+                byte[] buffer_msg = sms_size.getBytes();
+                DatagramPacket firstMessage = new DatagramPacket(buffer_msg, buffer_msg.length, group, PORT);
+                multicast_socket.send(firstMessage);
 
 
                 //send mensagem
@@ -159,7 +159,7 @@ public class Downloader extends UnicastRemoteObject implements DownloaderInterfa
                     while(!flag){
                         Long pastTime = System.currentTimeMillis();
                         if(pastTime - time > 60000){
-                            multicast_socket.send(handshake);
+                            multicast_socket.send(firstMessage);
                             multicast_socket.send(packet);
                             time = System.currentTimeMillis();
                         }
