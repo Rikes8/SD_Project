@@ -29,6 +29,7 @@
 
         //LinkedBlockingQueue does not need size
         public static LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<>();
+        public static LinkedBlockingQueue<String> processados = new LinkedBlockingQueue<>();
         public static ArrayList<String> cache = new ArrayList<>();
 
 
@@ -87,7 +88,7 @@
                     Socket clientSocket = listenSocket.accept(); // BLOQUEANTE
                     //System.out.println("CLIENT_SOCKET (created at accept())="+clientSocket);
                     numero++;
-                    new Connection(clientSocket, numero, queue);
+                    new Connection(clientSocket, numero, queue,processados);
                 }
             } catch(IOException e) {
                 System.out.println("Listen:" + e.getMessage());
@@ -102,15 +103,17 @@
         Socket clientSocket;
         int thread_number;
         LinkedBlockingQueue<String> queue;
+        LinkedBlockingQueue<String> process;
 
 
-        public Connection (Socket aClientSocket, int numero, LinkedBlockingQueue<String> fifo) {
+        public Connection (Socket aClientSocket, int numero, LinkedBlockingQueue<String> fifo, LinkedBlockingQueue<String> processados) {
             thread_number = numero;
             try{
                 clientSocket = aClientSocket;
                 in = new DataInputStream(clientSocket.getInputStream());
                 out = new DataOutputStream(clientSocket.getOutputStream());
                 queue = fifo;
+                process = processados;
                 this.start();
             }catch(IOException e){System.out.println("Connection:" + e.getMessage());}
         }
@@ -126,22 +129,31 @@
 
                     if (aux[0].equals("pedido")) {
                         //envia url ao downloader
-                        out.writeUTF(queue.take());
+                        String url = queue.take();
+                        System.out.println(url);
+                        out.writeUTF(url);
 
                         //receber info do downloader
                         data = in.readUTF();
 
+                        String dataAux[] = data.split("-->");
+                        if(dataAux[0].equals(url)){
+                            System.out.println("AQUI");
+                            process.add(dataAux[0]);
+                        }
+                        else{
+                            queue.add(dataAux[0]);
+                        }
                         int i = 0;
                         int length = data.length();
                         String[] words = new String[length];
-                        StringTokenizer tokens = new StringTokenizer(data);
+                        StringTokenizer tokens = new StringTokenizer(dataAux[1]);
                         while (tokens.hasMoreElements()) {
                             words[i] = tokens.nextToken();
                             if (words[i].equals("url_ap")) {
                                 String garbage = tokens.nextToken();
                                 String Url = tokens.nextToken();
-                                if (!queue.contains(Url)) {
-                                    //System.out.println("T[" + thread_number + "] Recebeu: "+Url);
+                                if (!queue.contains(Url) && !process.contains(Url)) {
                                     queue.add(Url);
                                 }
                             }
@@ -151,13 +163,12 @@
                     }else if (aux.length == 2){ //receber do cliente
                         out.writeUTF("message received!");
                         String Url = aux[1];
-                        if (!queue.contains(Url)) {
-                            //System.out.println("T[" + thread_number + "] Recebeu: "+Url);
+                        if (!queue.contains(Url) && !process.contains(Url)) {
                             queue.add(Url);
                         }
                     }
                     pedido = "";
-                    System.out.println("queue contains " + queue);
+                    //System.out.println("queue contains " + queue);
                 }
 
 

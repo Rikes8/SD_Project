@@ -70,7 +70,7 @@ public class Downloader extends UnicastRemoteObject implements DownloaderInterfa
 
                 url = in.readUTF();
 
-
+                String identifier = Integer.toString(id);
                 String sms_urls = "type | url_list ; item_count | ";
                 String sms_barrels = "type | url ; ";
                 String s_quote = " qoute | ";
@@ -139,7 +139,8 @@ public class Downloader extends UnicastRemoteObject implements DownloaderInterfa
                 InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS);
 
                 //handshake with the size
-                String sms_size = Integer.toString(sms_barrels.length());
+                int UdpPort = sms_barrels.length();
+                String sms_size = identifier + ";" +Integer.toString(sms_barrels.length());
                 byte[] buffer_handshake = sms_size.getBytes();
                 DatagramPacket handshake = new DatagramPacket(buffer_handshake, buffer_handshake.length, group, PORT);
                 multicast_socket.send(handshake);
@@ -149,15 +150,39 @@ public class Downloader extends UnicastRemoteObject implements DownloaderInterfa
                 byte[] buffer = sms_barrels.getBytes();
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, PORT);
                 multicast_socket.send(packet);
+                Long time = System.currentTimeMillis();
 
                 //try { sleep((long) (Math.random() * SLEEP_TIME)); } catch (InterruptedException e) { }
 
+                try (DatagramSocket aSocket = new DatagramSocket(UdpPort)) {
+                    boolean flag = false;
+                    while(!flag){
+                        Long pastTime = System.currentTimeMillis();
+                        if(pastTime - time > 60000){
+                            multicast_socket.send(handshake);
+                            multicast_socket.send(packet);
+                            time = System.currentTimeMillis();
+                        }
+                        byte[] buffer_ack = new byte[1024];
+                        DatagramPacket request = new DatagramPacket(buffer_ack, buffer_ack.length);
+                        aSocket.receive(request);
+                        String s = new String(request.getData(), 0, request.getLength());
+                        if(s.equals(identifier)){
+                            flag = true;
+                        }
+                    }
+
+                }catch (SocketException e){
+                    System.out.println("Socket: " + e.getMessage());
+                }catch (IOException e){
+                    System.out.println("IO: " + e.getMessage());
+                }
                 //===============================================================================
                 //==========================   TCP   ==================================
                 //===============================================================================
 
                 //FIXME: TCP connection ==> Envia urls para a Queue
-
+                sms_urls = url + "--> " + sms_urls;
                 out.writeUTF(sms_urls);
             }
         }catch (UnknownHostException e) {

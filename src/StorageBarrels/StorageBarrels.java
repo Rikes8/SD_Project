@@ -338,11 +338,11 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                     }
 
                     System.out.println("Received handshake from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + " with message:");
-                    String size = new String(packet.getData(), 0, packet.getLength());
-                    System.out.println(size);
+                    String handshake = new String(packet.getData(),0, packet.getLength());
+                    String[] idSize = handshake.split(";");
 
 
-                    byte[] sms_buffer = new byte[Integer.parseInt(size)];
+                    byte[] sms_buffer = new byte[Integer.parseInt(idSize[1])];
                     DatagramPacket sms_packet = new DatagramPacket(sms_buffer, sms_buffer.length);
                     try {
                         multicast_socket.receive(sms_packet);
@@ -466,26 +466,23 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                             index.put(wAux, ul);
                         }
                     }
+                    try (DatagramSocket aSocket = new DatagramSocket()) {
+                        byte [] m = idSize[0].getBytes();
+                        int UDP_PORT = Integer.parseInt(idSize[1]);
+                        DatagramPacket request = new DatagramPacket(m,m.length,sms_packet.getAddress(),UDP_PORT);
+                        aSocket.send(request);
+                    }catch (SocketException e){
+                        System.out.println("Socket: " + e.getMessage());
+                    }catch (IOException e){
+                        System.out.println("IO: " + e.getMessage());
+                    }
 
                     //System.out.println("debug2");
                     //printMap(index);
 
 
-                    /*    //escreve o hasmap
-                        oos.writeObject(index);
-
-                        oos.close();
-
-                    } catch (FileNotFoundException e) {
-                        throw new RuntimeException(e);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }*/
-
-
-
-
-
+                        //escreve o hasmap
+                        //oos.writeObject(index);
 
                     words_array.clear();
                     links_array.clear();
