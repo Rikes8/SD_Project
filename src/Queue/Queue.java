@@ -1,28 +1,13 @@
     package src.Queue;
 
-    import src.Classes.User;
-
     import java.net.*;
     import java.io.*;
-    import java.nio.file.Files;
-    import java.rmi.RemoteException;
     import java.util.ArrayList;
-    import java.util.Scanner;
-    import java.util.SimpleTimeZone;
     import java.util.StringTokenizer;
     import java.util.concurrent.*;
 
     import static java.lang.Integer.parseInt;
 
-    //QUEUURL[urls porprocessar]
-    //URLemproc[meter aqui e dps verificar]
-
-    //enviar para barrels e depois fazer comparação se o enviado pelos downloaders chegou.
-
-
-    //SINCRONIZAÇAO BARRELS
-    //pedir mensagens perdidas
-    //cada barrel ter um arraylist compacotes recebidos e nos downloaders um com os enviados(id, count),
 
     public class Queue {
         private static int serverPort = 6000;
@@ -33,18 +18,21 @@
         public static ArrayList<String> cache = new ArrayList<>();
 
 
-
         public static void main(String args[]){
             int numero=0;
             String file_info = "";
+
+            //file backup location
             String file_queue = "src/Queue/queue_cache.txt";
+
+            //socket TCP
             try (ServerSocket listenSocket = new ServerSocket(serverPort)) {
-                //System.out.println("A escuta no porto 6000");
                 System.out.println("LISTEN SOCKET=" + listenSocket);
 
+                //if file is empty create new one, if exists read information insided it
                 File f = new File(file_queue);
                 if (f.exists()) {
-                    //ler info do ficheiro
+                    //read the file
                     try{
                         FileReader freader = new FileReader(f);
                         BufferedReader reader = new BufferedReader(freader);
@@ -59,13 +47,14 @@
                 }else{
                     f.createNewFile();
                 }
-                System.out.println(queue);
+                //System.out.println(queue);
 
-
+                //Ctrl + C handler
                 Runtime.getRuntime().addShutdownHook(new Thread() {
                     public void run() {
                         String file_queue = "src/Queue/queue_cache.txt";
-                        //guardar info no ficheiro
+                        //store information in the file
+                        //if file has information, read first, add the new, and store to it
                         try{
                             FileWriter file = new FileWriter(file_queue);
                             while (!queue.isEmpty()){
@@ -96,7 +85,7 @@
         }
     }
 
-    //= Thread para tratar de cada canal de comunicação com um cliente
+    // Thread -> client channel
     class Connection extends Thread {
         DataInputStream in;
         DataOutputStream out;
@@ -122,18 +111,18 @@
             String data, pedido;
             try {
                 while (true) {
-                    //receber pedido do downloader para dar crawl a url
+                    //recieve request from downloader to crawl
                     pedido = in.readUTF();
                     String[] aux = pedido.split(" ");
 
 
                     if (aux[0].equals("pedido")) {
-                        //envia url ao downloader
+                        //send url to downloader
                         String url = queue.take();
                         System.out.println(url);
                         out.writeUTF(url);
 
-                        //receber info do downloader
+                        //recieve information from downloader
                         data = in.readUTF();
 
                         String dataAux[] = data.split("-->");
@@ -160,7 +149,7 @@
                             i = i + 1;
                         }
 
-                    }else if (aux.length == 2){ //receber do cliente
+                    }else if (aux.length == 2){ //receive request from client
                         out.writeUTF("message received!");
                         String Url = aux[1];
                         if (!queue.contains(Url) && !process.contains(Url)) {

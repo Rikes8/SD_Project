@@ -266,7 +266,7 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
     }
 
     //FIXME: Testes.Não que não devia estar static.
-   public static void printMap( ConcurrentHashMap<Word, HashSet<Url>> index)
+    public static void printMap( ConcurrentHashMap<Word, HashSet<Url>> index)
     {
         System.out.println("entrei");
         Set<Word> key = index.keySet();
@@ -319,7 +319,7 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                         break; // eof
                     }
                 }
-                printMap(index);
+                //printMap(index);
             }
 
         } catch (IOException e) {
@@ -338,11 +338,11 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                     }
 
                     System.out.println("Received handshake from " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + " with message:");
-                    String handshake = new String(packet.getData(),0, packet.getLength());
-                    String[] idSize = handshake.split(";");
+                    String size = new String(packet.getData(), 0, packet.getLength());
+                    System.out.println(size);
 
 
-                    byte[] sms_buffer = new byte[Integer.parseInt(idSize[1])];
+                    byte[] sms_buffer = new byte[Integer.parseInt(size)];
                     DatagramPacket sms_packet = new DatagramPacket(sms_buffer, sms_buffer.length);
                     try {
                         multicast_socket.receive(sms_packet);
@@ -353,7 +353,7 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                     String sms = new String(sms_packet.getData(), 0, sms_packet.getLength());
 
                     //System.out.println(sms);
-                   //FIXME: Meter isto numa função
+                    //FIXME: Meter isto numa função
 
                     ArrayList<String> links_array = new ArrayList<>();
                     ArrayList<String> words_array = new ArrayList<>();
@@ -419,6 +419,9 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                         }
                     }
 
+
+
+
                     for (Url key : index_apontados.keySet()) {
                         ArrayList<String> sH = index_apontados.get(key);
                         for(String s: sH){
@@ -463,23 +466,24 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                             index.put(wAux, ul);
                         }
                     }
-                    try (DatagramSocket aSocket = new DatagramSocket()) {
-                        byte [] m = idSize[0].getBytes();
-                        int UDP_PORT = Integer.parseInt(idSize[1]);
-                        DatagramPacket request = new DatagramPacket(m,m.length,sms_packet.getAddress(),UDP_PORT);
-                        aSocket.send(request);
-                    }catch (SocketException e){
-                        System.out.println("Socket: " + e.getMessage());
-                    }catch (IOException e){
-                        System.out.println("IO: " + e.getMessage());
-                    }
 
                     //System.out.println("debug2");
                     //printMap(index);
 
 
-                        //escreve o hasmap
-                        //oos.writeObject(index);
+                    /*    //escreve o hasmap
+                        oos.writeObject(index);
+                        oos.close();
+                    } catch (FileNotFoundException e) {
+                        throw new RuntimeException(e);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }*/
+
+
+
+
+
 
                     words_array.clear();
                     links_array.clear();
@@ -501,10 +505,8 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                     try {
                         FileOutputStream fos = new FileOutputStream(file);
                         ObjectOutputStream oos = new ObjectOutputStream(fos);
-
                         FileInputStream fin = new FileInputStream(file);
                         ObjectInputStream in = new ObjectInputStream(fin);
-
                         if (file.length() != 0) {
                             while (true) {
                                 try {
@@ -515,13 +517,10 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                                 }
                             }
                         }
-
                         //escreve o hasmap
                         oos.writeObject(index_apontados);
-
                         oos.close();
                         in.close();
-
                     } catch (FileNotFoundException e) {
                         throw new RuntimeException(e);
                     } catch (IOException e) {
@@ -562,4 +561,3 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
     }
 
 }
-

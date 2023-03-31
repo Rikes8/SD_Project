@@ -4,12 +4,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.jsoup.select.Evaluator;
-import src.SearchModule.ServerInterface;
-import src.StorageBarrels.BarrelsInterface;
-import src.StorageBarrels.StorageBarrels;
 
-import javax.net.ssl.SSLHandshakeException;
+import src.SearchModule.ServerInterface;
+
 import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -20,12 +17,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.net.*;
-import java.util.Scanner;
 import java.io.*;
 import java.net.MulticastSocket;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
-import java.io.IOException;
 
 public class Downloader extends UnicastRemoteObject implements DownloaderInterface {
 
@@ -40,22 +35,17 @@ public class Downloader extends UnicastRemoteObject implements DownloaderInterfa
 
     public Downloader() throws RemoteException {
         super();
-        this.id = -1;
+        this.id = -1; //id
     }
 
-    public String UpdateActiveDownloaders (String s) throws RemoteException {
-        return "sou dow";
-    }
 
     public void run() {
-
-
-
+        //create socket TCP to communicate with queue
         try (Socket socket = new Socket("localhost", serversocket)) {
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
             DataInputStream in = new DataInputStream(socket.getInputStream());
-            MulticastSocket multicast_socket = null;
 
+            MulticastSocket multicast_socket = null;
             multicast_socket = new MulticastSocket();
 
             while (true){
@@ -64,10 +54,11 @@ public class Downloader extends UnicastRemoteObject implements DownloaderInterfa
                 String url = "";
 
 
-                //FIXME: TCP connection == FAZER PEDIDO
+                //TCP handshake
                 String pedido = "pedido";
                 out.writeUTF(pedido);
 
+                //get the responde
                 url = in.readUTF();
 
                 String identifier = Integer.toString(id);
@@ -77,13 +68,13 @@ public class Downloader extends UnicastRemoteObject implements DownloaderInterfa
                 String s_title = "title | ";
                 String sms_words = "type | word_list ; item_count | ";
                 String sms_words_aux = "";
-                List<String> repeated = new ArrayList<>();
 
                 try{
-                    //FIXME: JSOUP
+                    //JSOUP
                     Document doc = Jsoup.connect(url).get();
                     StringTokenizer tokens = new StringTokenizer(doc.text());
 
+                    //add words to the message
                     sms_barrels = sms_barrels + "url | " +url + " ; ";
                     sms_barrels = sms_barrels + s_title;
 
@@ -102,7 +93,6 @@ public class Downloader extends UnicastRemoteObject implements DownloaderInterfa
                         sms_barrels = sms_barrels + s_quote + ";";
                     }
 
-                    //FIXME: Adiciona as words à mensagem
                     int i = 0;
                     String word = null;
                     int countTokens = 0;
@@ -116,35 +106,33 @@ public class Downloader extends UnicastRemoteObject implements DownloaderInterfa
                     sms_words = sms_words + i + " ; " + sms_words_aux;
                     sms_barrels = sms_barrels + sms_words;
 
-                    //FIXME: Conta o numero de links encontrados
+                    //count number of links founded
                     Elements links = doc.select("a[href]");
                     for (Element link : links){
                         count_urls ++;
                     }
 
-                    //FIXME: Adiciona os links à mensagem
+                    //add links to the message
                     sms_urls = sms_urls + count_urls + " ; ";
                     for (Element link : links){
                         sms_urls = sms_urls + "url_ap | " + link.attr("abs:href") + " ; ";
                     }
                     sms_barrels = sms_barrels + sms_urls;
+
                     System.out.println(sms_barrels);
                 }catch (IOException e) {
                     //e.printStackTrace();
                 }
 
-
-                //FIXME: Multicast "server" connection ==> Enviar as words para os barrels
-                //while(true){
+                //Multicast Server connection -> send information to barrels
                 InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS);
 
-                //handshake with the size
+                //message with the size
                 int UdpPort = sms_barrels.length();
                 String sms_size = identifier + ";" + Integer.toString(sms_barrels.length());
                 byte[] buffer_msg = sms_size.getBytes();
                 DatagramPacket firstMessage = new DatagramPacket(buffer_msg, buffer_msg.length, group, PORT);
                 multicast_socket.send(firstMessage);
-
 
                 //send mensagem
                 byte[] buffer = sms_barrels.getBytes();
@@ -152,8 +140,7 @@ public class Downloader extends UnicastRemoteObject implements DownloaderInterfa
                 multicast_socket.send(packet);
                 Long time = System.currentTimeMillis();
 
-                //try { sleep((long) (Math.random() * SLEEP_TIME)); } catch (InterruptedException e) { }
-
+                //socket UDP
                 try (DatagramSocket aSocket = new DatagramSocket(UdpPort)) {
                     boolean flag = false;
                     while(!flag){
@@ -177,11 +164,9 @@ public class Downloader extends UnicastRemoteObject implements DownloaderInterfa
                 }catch (IOException e){
                     System.out.println("IO: " + e.getMessage());
                 }
-                //===============================================================================
-                //==========================   TCP   ==================================
-                //===============================================================================
 
-                //FIXME: TCP connection ==> Envia urls para a Queue
+
+                //TCP connection -> send urls to queue
                 sms_urls = url + "--> " + sms_urls;
                 out.writeUTF(sms_urls);
             }
@@ -203,14 +188,14 @@ public class Downloader extends UnicastRemoteObject implements DownloaderInterfa
             String nome = "localhost";
             ServerInterface server = (ServerInterface) LocateRegistry.getRegistry(9000).lookup("DOWNLOADER");
             Downloader down = new Downloader();
+
+            //return is id
             down.id = server.subscribe_downloader(nome, (DownloaderInterface) down);
             System.out.println("Downloader sent subscription to server");
-            //server.ShareInfoToServer(down.id,"+1d");
 
+            //Ctrl+C thread handler
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
-                    //guardar info no ficheiro
-
                     try {
                         server.ShareInfoToServer(down.id,"-1d");
                     } catch (RemoteException e) {
@@ -219,6 +204,7 @@ public class Downloader extends UnicastRemoteObject implements DownloaderInterfa
                 }
             });
 
+            //starts
             down.run();
 
         }catch (Exception e) {

@@ -6,14 +6,13 @@ import java.rmi.server.*;
 import java.io.*;
 import src.SearchModule.ServerInterface;
 
-
 public class Client extends UnicastRemoteObject implements ClientInterface {
 
     private int id;
 
     Client() throws RemoteException {
         super();
-        this.id = -1;
+        this.id = -1; //id
     }
 
     //Func RMI Callback to send info to searchModule and receive sth
@@ -23,6 +22,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
     //}
 
     public void print_on_client(String s) throws RemoteException {
+        //To print in client the message recieved by RMI Callback
         System.out.println("Updated stats:\n" + s);
     }
 
@@ -39,15 +39,16 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
             String nome = "localhost";
             ServerInterface h = (ServerInterface) LocateRegistry.getRegistry(7000).lookup("XPTO"); //r.lookup("XPTO");
             Client c = new Client();
+
+            //return is the id of client
             c.id = h.subscribe_client(nome, (ClientInterface) c);
-            //h.ShareInfoToServer(c.id, "+1c");
             System.out.println("Client sent subscription to server");
 
+            //catchs the Crtl+C signal
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
-                    //guardar info no ficheiro
-
                     try {
+                        //say to server that client with this id ended
                         h.ShareInfoToServer(c.id,"-1c");
                     } catch (RemoteException e) {
                     }
@@ -58,6 +59,7 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
             while (true) {
                 System.out.print("> ");
                 ClientInput = reader.readLine();
+                //send client input by RMI Callback and print what is returned
                 System.out.println(h.ShareInfoToServer(c.id, ClientInput));
             }
         } catch (Exception e) {
