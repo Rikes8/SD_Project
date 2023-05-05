@@ -127,7 +127,7 @@
 
                         String dataAux[] = data.split("-->");
                         if(dataAux[0].equals(url)){
-                            System.out.println("AQUI");
+                            //System.out.println("AQUI");
                             process.add(dataAux[0]);
                         }
                         else{
