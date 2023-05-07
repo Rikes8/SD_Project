@@ -29,6 +29,9 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
     private static ConcurrentHashMap<String,ArrayList<String>> index_apontados_cpy = new ConcurrentHashMap<String,ArrayList<String>>();
 
 
+    LinkedBlockingQueue<Url> repetidos = new LinkedBlockingQueue<>();
+
+
     public StorageBarrels() throws RemoteException {
         super();
         this.id = -1; //id
@@ -62,7 +65,6 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                 }
 
                 users.add(u);
-
 
                 for (User usr : users) {
                     oos.writeObject(usr);
@@ -119,14 +121,11 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
         } else if (str[0].equals("search")) {
 
             //gets the links that are in commun with the works inputed
-
-            //List<Url> to_delete = new ArrayList<>();
-            //List<Url> repetidos = new ArrayList<>();
             LinkedBlockingQueue<Url> to_delete = new LinkedBlockingQueue<>();
-            LinkedBlockingQueue<Url> repetidos = new LinkedBlockingQueue<>();
 
-            System.out.println(index);
-            System.out.println("print");
+
+            //System.out.println(index);
+            //System.out.println("print");
 
             for (int j = 1; j < str.length; j++){
 
@@ -151,7 +150,6 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                                         flag = true;
                                         break;
                                     }
-
                                 }
                                 //get non-repeated
                                 if (!flag) {
@@ -166,11 +164,8 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                                     }
                                 }
                             }
-
                         }
-
                     }
-
                 }
             }
 
@@ -193,9 +188,18 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                 }
             }
 
+            System.out.println(repetidos.size());
 
+
+            int count_rep = 0;
             for (Url u:repetidos) {
+                if (count_rep >= 9){
+                    message = message + "\nWrite \"plus\" for more!\n";
+                    return message;
+                }
                 message = message + u.getName() +"\n" + u.getTitle() + "\n" + u.getQuote() + "\n\n";
+                repetidos.remove(u);
+                count_rep++;
             }
 
 
@@ -207,7 +211,7 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                 message = message + repetidos.get(i).getName() +"\n" + repetidos.get(i).getTitle() + "\n" + repetidos.get(i).getQuote() + "\n\n";
             }*/
 
-            return message;
+
 
         }else if(str[0].equals("conn")){
 
@@ -224,6 +228,20 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
             }
             return message;
 
+        }else if(str[0].equals("plus")){
+            System.out.println("entrei");
+            int count_rep_2 = 0;
+            for (Url u:repetidos) {
+                if (count_rep_2 >= 9){
+                    return "press space for more!";
+                }
+                message = message + u.getName() +"\n" + u.getTitle() + "\n" + u.getQuote() + "\n\n";
+                repetidos.remove(u);
+                count_rep_2++;
+            }
+
+            return message;
+
         }
 
 
@@ -232,30 +250,12 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
         return "Command not found";
     }
 
-   public static void printMap( ConcurrentHashMap<Word, HashSet<Url>> index)
-    {
-        Set<Word> key = index.keySet();
-        Set<Url> url;
-        for(Word e: key){
-            url = index.get(e);
-            System.out.println(e.getWord() + e.getCount());
-            for(Url u: url){
-                System.out.println(u.getName());
-            }
-        }
-    }
-
-
     public static void main(String args[]) throws IOException, NotBoundException, ServerNotActiveException {
         // usage: java HelloClient username
         //System.getProperties().put("java.security.policy", "policy.all");
         //System.setSecurityManager(new RMISecurityManager());
 
-
-
-
         //Multicast Thread
-
         String nome = "localhost";
         ServerInterface h = (ServerInterface) LocateRegistry.getRegistry(8000).lookup("BARREL");
         StorageBarrels b = new StorageBarrels();
@@ -270,72 +270,65 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
 
 
         String file2_aux = "src/StorageBarrels/index_apontados_cpy.obj";
+        File file2_2 = new File(file2_aux);
+        if(!file2_2.exists()){
+            file2_2.createNewFile();
+        }
         try {
+            if (file2_2.length() != 0) {
 
-            FileInputStream fin22 = new FileInputStream(file2_aux);
-            ObjectInputStream in22 = new ObjectInputStream(fin22);
-
-            if (file2_aux.length() != 0) {
+                FileInputStream fin22 = new FileInputStream(file2_2);
+                ObjectInputStream in22 = new ObjectInputStream(fin22);
                 System.out.println("entrei");
                 while (true) {
                     try {
                         index_apontados_cpy = (ConcurrentHashMap<String,ArrayList<String>>) in22.readObject();
-                        //index_apontados_cpy.putAll(in_file);
 
                     } catch (Exception e) {
                         break; // eof
                     }
                 }
+                in22.close();
             }
 
-            in22.close();
-
         } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         String file3_aux = "src/StorageBarrels/words.obj";
+        File file3_3 = new File(file3_aux);
+        if(!file3_3.exists()){
+            file3_3.createNewFile();
+        }
         try {
-            FileInputStream fin3 = new FileInputStream(file3_aux);
-            ObjectInputStream in3 = new ObjectInputStream(fin3);
-
-            //System.out.println(index + "\n...");
-
-            if (file3_aux.length() != 0) {
-                //System.out.println("entre2");
+            if (file3_3.length() != 0) {
+                FileInputStream fin3 = new FileInputStream(file3_3);
+                ObjectInputStream in3 = new ObjectInputStream(fin3);
                 while (true) {
-                    //System.out.println("->2");
                     try {
-                        //System.out.println("->2.1");
                         index = (ConcurrentHashMap<Word,HashSet<Url>>) in3.readObject();
-                        //System.out.println(index);
-                        //index.putAll(in_file);
-                        //System.out.println();
+
                     } catch (Exception e) {
-                        //System.out.println("out");
                         break; // eof
                     }
                 }
-
+                in3.close();
             }
-            in3.close();
 
         } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         String file_aux = "src/StorageBarrels/index_apontados.obj";
-
-
+        File file1_1 = new File(file_aux);
+        if(!file1_1.exists()){
+            file1_1.createNewFile();
+        }
         try {
-            FileInputStream finn3 = new FileInputStream(file_aux);
-            ObjectInputStream inn33 = new ObjectInputStream(finn3);
 
-            if (file_aux.length() != 0) {
+            if (file1_1.length() != 0) {
+                FileInputStream finn3 = new FileInputStream(file1_1);
+                ObjectInputStream inn33 = new ObjectInputStream(finn3);
 
                 while (true) {
                     try {
@@ -344,12 +337,10 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                         break; // eof
                     }
                 }
+                inn33.close();
             }
-            inn33.close();
 
         } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
@@ -484,9 +475,7 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                             }
                         }
 
-
                         oos.writeObject(index_apontados_cpy);
-
                         oos.close();
                         in.close();
 
@@ -495,12 +484,6 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
-
-
-
-
-
-
 
                     for (Url key : index_apontados.keySet()) {
                         ArrayList<String> sH = index_apontados.get(key);
@@ -512,6 +495,11 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                             }
                         }
                     }
+
+                    System.out.println("debug_1");
+                    System.out.println(index_apontados);
+                    System.out.println("debug_2");
+                    System.out.println(index_apontados_cpy);
 
 
                     ArrayList<String> wordsToIndex = new ArrayList<>();
@@ -531,6 +519,7 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
 
 
                     String file3 = "src/StorageBarrels/words.obj";
+
                     try {
                         FileOutputStream fos = new FileOutputStream(file3);
                         ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -597,18 +586,12 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                         System.out.println("IO: " + e.getMessage());
                     }
 
-                    //System.out.println("debug2");
-                    //printMap(index);
-
-
-
-
 
                     words_array.clear();
                     links_array.clear();
                 }
 
-            } finally {
+            }finally {
                 multicast_socket.close();
             }
         });
@@ -617,53 +600,8 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                 //guardar info no ficheiro
-
                 try {
                     h.ShareInfoToServer(b.id,"-1b");
-                    String file = "src/StorageBarrels/urls.obj";
-                    /*try {
-                        FileOutputStream fos = new FileOutputStream(file);
-                        ObjectOutputStream oos = new ObjectOutputStream(fos);
-
-                        FileInputStream fin = new FileInputStream(file);
-                        ObjectInputStream in = new ObjectInputStream(fin);
-
-
-                        if (file.length() != 0) {
-                            while (true) {
-                                try {
-                                    ConcurrentHashMap<Url,ArrayList<String>> in_url_obj = (ConcurrentHashMap<Url,ArrayList<String>>) in.readObject();
-                                    index_apontados.putAll(in_url_obj);
-                                } catch (Exception e) {
-                                    break; // eof
-                                }
-                            }
-                        }
-
-
-
-
-
-
-
-
-                        //escreve o hasmap
-                        //oos.writeObject(index_apontados);
-
-
-
-                        oos.close();
-                        in.close();
-
-                    } catch (FileNotFoundException e) {
-                        throw new RuntimeException(e);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }*/
-
-
-
-
                 } catch (RemoteException e) {
                     throw new RuntimeException(e);
                 }
@@ -679,7 +617,6 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
 
         while (true){
             try {
-
                 System.out.print("> ");
                 ClientInput = reader.readLine();
                 h.ShareInfoToServer(b.id, ClientInput);
@@ -687,12 +624,6 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                 System.out.println("Exception in main: " + e);
             }
         }
-
-
-
-
-
     }
-
 }
 

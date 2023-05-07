@@ -149,7 +149,7 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
             //to return (client gets this message)
             message = "link indexado!";
 
-        }else if(str[0].equals("search") || str[0].equals("conn")){
+        }else if(str[0].equals("search") || str[0].equals("conn") || str[0].equals("plus")){
 
             /*if (str[0].equals("conn")){
                 for (Map.Entry<Integer, String> entry : IpClients.entrySet()) {
