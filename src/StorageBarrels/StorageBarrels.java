@@ -229,7 +229,7 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
             return message;
 
         }else if(str[0].equals("plus")){
-            System.out.println("entrei");
+            //System.out.println("entrei");
             int count_rep_2 = 0;
             for (Url u:repetidos) {
                 if (count_rep_2 >= 9){
@@ -279,7 +279,7 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
 
                 FileInputStream fin22 = new FileInputStream(file2_2);
                 ObjectInputStream in22 = new ObjectInputStream(fin22);
-                System.out.println("entrei");
+                //System.out.println("entrei");
                 while (true) {
                     try {
                         index_apontados_cpy = (ConcurrentHashMap<String,ArrayList<String>>) in22.readObject();
@@ -459,21 +459,30 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                             }
                         }
 
-                        ArrayList<String> auxlinks = new ArrayList<>();
+                        //link e lista de links
+                        //pegar em cada link de lista de links
+                        //string -> cada link da lista do lado equerdo
+                        //array -> próprio link da pag
+
+
+                        System.out.println(links_array);
                         for (String link : links_array) {
-
-                            if (index_apontados_cpy.get(link) == null) {
-                                auxlinks.add(url.getName());
-                                index_apontados_cpy.put(link, auxlinks);
-                            } else {
-                                auxlinks = index_apontados_cpy.get(link);
-                                if (!auxlinks.contains(url.getName())) {
-                                    auxlinks.add(link);
-                                    index_apontados_cpy.put(link, auxlinks);
+                            if(index_apontados_cpy.get(link) != null){
+                                ArrayList<String> lista_links = index_apontados_cpy.get(link);
+                                if (!lista_links.contains(url.getName())){
+                                    lista_links.add(url.getName());
+                                    index_apontados_cpy.put(link, lista_links);
                                 }
-
+                            }else{
+                                ArrayList<String> lista_links_n = new ArrayList<String>();
+                                lista_links_n.add(url.getName());
+                                index_apontados_cpy.put(link, lista_links_n);
                             }
                         }
+
+                        System.out.println("debug_2");
+                        System.out.println(index_apontados_cpy);
+
 
                         oos.writeObject(index_apontados_cpy);
                         oos.close();
@@ -496,10 +505,6 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                         }
                     }
 
-                    System.out.println("debug_1");
-                    System.out.println(index_apontados);
-                    System.out.println("debug_2");
-                    System.out.println(index_apontados_cpy);
 
 
                     ArrayList<String> wordsToIndex = new ArrayList<>();
@@ -514,8 +519,6 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                         }
                     }
 
-                    //System.out.println("debug1");
-                    //System.out.println(wordsToIndex);
 
 
                     String file3 = "src/StorageBarrels/words.obj";
@@ -560,7 +563,7 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
 
 
                         oos.writeObject(index);
-                        System.out.println(index);
+
 
                         oos.close();
                         in.close();
@@ -572,8 +575,6 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                     }
 
 
-
-                    //System.out.println(index);
 
                     try (DatagramSocket aSocket = new DatagramSocket()) {
                         byte [] m = idSize[0].getBytes();
@@ -588,7 +589,7 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
 
 
                     words_array.clear();
-                    links_array.clear();
+                    //links_array.clear();
                 }
 
             }finally {
