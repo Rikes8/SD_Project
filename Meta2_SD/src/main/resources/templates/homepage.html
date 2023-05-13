@@ -63,11 +63,11 @@
 <body>
 
     <div class = "tudo">
-        <a href="index.html" class = "indexar" th:href="@{http://localhost:8080//login}">Login</a>
-        <a href="indexarUrl.html" class = "indexar" th:href="@{http://localhost:8080/indexarUrl}">Indexar Url</a>
+        <a href="login" class = "indexar" th:href="@{http://localhost:8080/login}">Login</a>
+        <a href="indexarUrl" class = "indexar" th:href="@{http://localhost:8080/indexarUrl}">Indexar Url</a>
     </div>
     <div id="logo"></div>
-    <form id="search-form" th:action="@{/search}" method="get">
+    <form id="search-form" th:action="@{/search}" method="post">
         <input type="text" id="search-box" name="q" />
         <button type="submit" id="search-button">Pesquisa Googol</button>
         <input type="button" id = "index-button" onclick="location.href='http://localhost:8080/index.html';" value="Sinto-me com sorte" />
