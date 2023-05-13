@@ -285,10 +285,10 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
             downloader.rebind("DOWNLOADER", h);
 
             //Registry webserver
-            /*
+
             Registry webserver = LocateRegistry.createRegistry(4000);
             webserver.rebind("WEBSERVER", h);
-            */
+
 
             System.out.println("Hello Server ready.");
             while (true) {
