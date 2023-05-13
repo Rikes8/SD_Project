@@ -114,6 +114,8 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
                 clients.get(entry.getKey()).print_on_client(message);
             }
         }
+
+
     }
 
 
@@ -149,7 +151,7 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
             //to return (client gets this message)
             message = "link indexado!";
 
-        }else if(str[0].equals("search") || str[0].equals("conn") || str[0].equals("plus")){
+        }else if(str[0].equals("search") || str[0].equals("conn") || str[0].equals("statsv2")|| str[0].equals("plus")){
 
             /*if (str[0].equals("conn")){
                 for (Map.Entry<Integer, String> entry : IpClients.entrySet()) {
@@ -185,6 +187,7 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
                     statistics.replace(id, "false");
                 }
             }
+
 
         }else if(str[0].equals("-1b")){ //barrels ended
             for (Map.Entry<Integer, String> entry : IpBarrels.entrySet()) {

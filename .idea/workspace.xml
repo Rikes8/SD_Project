@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="de0dd8a4-d089-4e75-a25a-f36c0f38f42e" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/Meta2_SD/src/main/java/com/example/demo/DemoApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/Meta2_SD/src/main/java/com/example/demo/DemoApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SD_Project/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/SD_Project/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SD_Project/out/production/SD_Project/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/SD_Project/out/production/SD_Project/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SD_Project/out/production/SD_Project/src/StorageBarrels/index_apontados.obj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SD_Project/out/production/SD_Project/src/StorageBarrels/index_apontados_cpy.obj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SD_Project/out/production/SD_Project/src/StorageBarrels/words.obj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SD_Project/src/StorageBarrels/StorageBarrels.java" beforeDir="false" afterPath="$PROJECT_DIR$/SD_Project/src/StorageBarrels/StorageBarrels.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SD_Project/src/StorageBarrels/index_apontados.obj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SD_Project/src/StorageBarrels/index_apontados_cpy.obj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/SD_Project/src/StorageBarrels/words.obj" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ProjectId" id="2PkPfcY8umL0axRwaohc7H1xd5Q" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="de0dd8a4-d089-4e75-a25a-f36c0f38f42e" name="Changes" comment="" />
+      <created>1683998219835</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1683998219835</updated>
+      <workItem from="1683998225068" duration="29000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

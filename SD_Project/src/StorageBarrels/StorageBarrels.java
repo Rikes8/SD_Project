@@ -9,6 +9,7 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 import src.Classes.*;
 
@@ -139,6 +140,7 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                                 //add all at first
                                 repetidos.add(u);
 
+
                             }
                         }else{
 
@@ -176,19 +178,6 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
             int rev ;
 
 
-            for (Url u:repetidos) {
-                for (Map.Entry<Url, ArrayList<String>> entry : index_apontados.entrySet()) {
-                    Url url = entry.getKey();
-                    relevancia = entry.getValue();
-                    rev = relevancia.size();
-
-                    if (url.getName().equalsIgnoreCase(u.getName())){
-                        to_sort.put(u,rev);
-                    }
-                }
-            }
-
-            System.out.println(repetidos.size());
 
 
             int count_rep = 0;
@@ -198,18 +187,13 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                     return message;
                 }
                 message = message + u.getName() +"\n" + u.getTitle() + "\n" + u.getQuote() + "\n\n";
+                u.setTotalTargetUrls(u.getTotalTargetUrls() +1);
                 repetidos.remove(u);
                 count_rep++;
             }
 
 
-            /*for (Map.Entry<Url, Integer> en : repetidos.entrySet()) {
-                message = message + en.getKey().getName() +"\n" + en.getKey().getTitle() + "\n" + en.getKey().getQuote() + "\n\n";
-            }*/
 
-            /*for (int i = 0; i < repetidos.size(); i++) {
-                message = message + repetidos.get(i).getName() +"\n" + repetidos.get(i).getTitle() + "\n" + repetidos.get(i).getQuote() + "\n\n";
-            }*/
 
 
 
@@ -218,24 +202,70 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
 
             for (Map.Entry<String, ArrayList<String>> entry : index_apontados_cpy.entrySet()) {
                 String url = entry.getKey();
+
                 if (url.equalsIgnoreCase(str[1])){
 
-                    //message with links linked
-                    message = message + entry.getValue() + "\n\n";
+                    for (String url_h : entry.getValue()){
+                        message = message + url_h + "\n";
+                    }
                     break;
                 }
 
             }
+            message = message + "\n";
+            return message;
+
+        }else if(str[0].equals("statsv2")) {
+
+            int count = 10;
+            int size = 10;
+            int size_aux = 1;
+            int aux = 0;
+            int helper = 0;
+            HashMap<Integer,Url> num = new HashMap<>();
+            for (Url url_count : index_apontados.keySet()) {
+                    size_aux --;
+                    if (size != 0){
+                        num.put(url_count.getTotalTargetUrls(),url_count);
+                        size --;
+                    }else{
+                        for (Integer key : num.keySet()){
+
+                            if(size_aux == 0){
+                                helper = key;
+                                size_aux ++;
+                            }
+                        }
+                        num.remove(helper);
+                        num.put(url_count.getTotalTargetUrls(),url_count);
+
+                    }
+
+                    ArrayList<Integer> sort = new ArrayList<Integer>(num.keySet());
+                    Collections.sort(sort);
+
+            }
+
+            for ( HashMap.Entry<Integer, Url> entry : num.entrySet()) {
+                if(count != 0){
+                    message = message + entry.getValue().getName() +"\n";
+                }else{
+                    message = message +"\n";
+                    break;
+                }
+            }
+
             return message;
 
         }else if(str[0].equals("plus")){
             //System.out.println("entrei");
             int count_rep_2 = 0;
             for (Url u:repetidos) {
-                if (count_rep_2 >= 9){
+                if (count_rep_2 > 9){
                     return "press space for more!";
                 }
                 message = message + u.getName() +"\n" + u.getTitle() + "\n" + u.getQuote() + "\n\n";
+                u.setTotalTargetUrls(u.getTotalTargetUrls() +1);
                 repetidos.remove(u);
                 count_rep_2++;
             }
@@ -247,7 +277,7 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
 
 
 
-        return "Command not found";
+        return "Command not found: " + str[0];
     }
 
     public static void main(String args[]) throws IOException, NotBoundException, ServerNotActiveException {
@@ -485,28 +515,21 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                         //System.out.println("---------------------");
 
                         //ordem de relevancia
-                        /*
-                        for (String link: index_apontados_cpy.keySet()){
-                            int counter_size=0;
-                            ArrayList<String> apontados = index_apontados_cpy.get(link);
-                            for (int i = 0; i < apontados.size(); i++){
-                                counter_size ++;
-                            }
-                            relevancia.put(counter_size,index_apontados_cpy);
-                        }
 
-                        System.out.println(relevancia);
+                        //System.out.println(index_apontados_cpy.keySet());
+                        //System.out.println(index_apontados_cpy.keySet().size());
+                        //System.out.println("++++++++++++");
 
-                        TreeMap<Integer,ConcurrentHashMap<String,ArrayList<String>>> relevancia_sorted = new TreeMap<>(Collections.reverseOrder());
-                        relevancia_sorted.putAll(relevancia);
+                        // Sort the index_apontados_cpy map by ArrayList size in ascending order
 
 
-                        System.out.println("......................");
-                        //System.out.println(relevancia_sorted);
-                        System.out.println(".......................");
+                        //System.out.println("......................");
+                        //System.out.println(sortedMap);
+                        //System.out.println(sortedMap.keySet());
+                        //System.out.println(".......................");
 
 
-                         */
+
                         oos.writeObject(index_apontados_cpy);
                         oos.close();
                         in.close();
