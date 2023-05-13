@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            margin-top: 10%;
+            display: flex;
+            justify-content: center;
+            background-color: white;
+        }
+        .card {
+            max-width: 400px;
+            width: 100%;
+            border-radius: 10px;
+            background-color: #fff;
+        }
+        .card-header {
+            background-color: lightblue;
+            color: #fff;
+            padding: 16px;
+            font-weight: 400;
+            border-radius:0 0 0 0;
+        }
+        .card-title {
+            text-align: center;
+            padding: 6px;
+            margin: 0;
+
+        }
+        .subtitle {
+            text-align: center;
+            padding: 12px;
+            margin: 0;
+            font-size: 14px;
+            color: #a0a0a0;
+            font-weight: 400;
+        }
+        .card-body {
+            padding: 14px;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-control {
+            display: block;
+            width: 100%;
+            height: 30px;
+            padding: 8px 4px;
+            font-size: 16px;
+            border: none;
+            border-radius: 2px;
+        }
+        .button-to-login {
+            display: block;
+            width: 100%;
+            height: 40px;
+            background-color: lightblue;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 500;
+            border: none;
+            border-radius: 4px;
+        }
+        .button-to-login:hover {
+            background-color: lightskyblue;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="card-header">
+        <h1  class ="card-title">Googol</h1>
+        <h2 class="card-title">Inicie sessão</h2>
+        <p class ="subtitle"> Usar a tua Conta Googol</p>
+    </div>
+    <div class="card-body">
+        <form th:action="@{/login}" method="post">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" name="username" class="form-control" id="username" th:required="true"/>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" name="password" class="form-control" id="password" th:required="true"/>
+            </div>
+            <button type="submit" class="button-to-login">Login</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

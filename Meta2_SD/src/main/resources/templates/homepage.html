@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Googol</title>
+
+    <style>
+        .tudo{
+            text-align: right;
+            margin: auto auto auto;
+
+        }
+        #search-form {
+            justify-content: center;
+            width: 50%;
+            text-align: center;
+            margin: 0 auto auto;
+        }
+        #search-box {
+            width: 70%;
+            padding: 12px 20px;
+            margin: auto auto;
+            box-sizing: border-box;
+            border: 2px solid #ccc;
+            border-radius: 20px;
+        }
+        #search-button {
+            width: 30%;
+            background-color: lightblue;
+            color: white;
+            padding: 14px 25px;
+            margin: 12px 0;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        #index-button {
+            width: 30%;
+            background-color: lightblue;
+            color: white;
+            padding: 14px 25px;
+            margin: 12px 0;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        #index-button:hover {
+            background-color: lightskyblue;
+        }
+
+        #search-button:hover {
+            background-color:lightskyblue;
+        }
+        #logo {
+            margin: 80px auto auto;
+            width: 640px;
+            height: 250px;
+            justify-content: flex-start;
+            background-size: contain;
+            background: url('https://miro.medium.com/v2/resize:fit:786/format:webp/1*OYAMq-mnojvgn2zyJEcf2g.jpeg') no-repeat center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class = "tudo">
+        <a href="index.html" class = "indexar" th:href="@{http://localhost:8080//login}">Login</a>
+        <a href="indexarUrl.html" class = "indexar" th:href="@{http://localhost:8080/indexarUrl}">Indexar Url</a>
+    </div>
+    <div id="logo"></div>
+    <form id="search-form" th:action="@{/search}" method="get">
+        <input type="text" id="search-box" name="q" />
+        <button type="submit" id="search-button">Pesquisa Googol</button>
+        <input type="button" id = "index-button" onclick="location.href='http://localhost:8080/index.html';" value="Sinto-me com sorte" />
+    </form>
+
+</body>
+</html>
