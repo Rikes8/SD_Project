@@ -62,14 +62,15 @@
 </head>
 <body>
 
-<div class = "tudo">
-  <a href="homepage" class = "indexar">Voltar</a>
-</div>
-<div id="logo"></div>
-<form id="search-form" th:action="@{/indexarUrl}" method="get">
-  <input type="text" id="search-box" name="q" />
-  <button type="submit" id="search-button">Indexar Url</button>
-</form>
+  <div class = "tudo">
+    <a href="homepage" class = "indexar">Voltar</a>
+  </div>
+  <div id="logo"></div>
+
+  <form id="search-form" th:action="@{/indexarUrl}" method="post">
+    <input type="text" id="search-box" th:value="${input}" name="input" />
+    <button type="submit" id="search-button">Indexar Url</button>
+  </form>
 
 </body>
 </html>

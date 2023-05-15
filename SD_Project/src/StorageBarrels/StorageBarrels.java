@@ -2,6 +2,8 @@ package src.StorageBarrels;
 
 import src.Classes.Word;
 import src.SearchModule.ServerInterface;
+
+import java.awt.image.AreaAveragingScaleFilter;
 import java.rmi.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.*;
@@ -40,6 +42,8 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
 
     //RMI Callback -> Input from client and requires information from barrel
     public String ShareInfoToBarrel(String s) throws RemoteException {
+
+
         String message ="";
         String[] str= s.split(" ");
         if (str[0].equals("register")) {
@@ -108,6 +112,7 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
                     if (usr.getName().equals(str[1]) && usr.getPassword().equals(str[2])){
                         users.clear();
                         return "Client Logged";
+
                     }
                 }
 

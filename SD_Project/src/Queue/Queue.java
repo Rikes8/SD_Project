@@ -157,7 +157,7 @@
                         }
                     }
                     pedido = "";
-                    //System.out.println("queue contains " + queue);
+                    System.out.println("queue contains " + queue);
                 }
 
 

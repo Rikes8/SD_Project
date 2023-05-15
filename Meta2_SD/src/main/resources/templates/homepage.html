@@ -61,10 +61,16 @@
     </style>
 </head>
 <body>
-
     <div class = "tudo">
-        <a href="login" class = "indexar" th:href="@{http://localhost:8080/login}">Login</a>
-        <a href="indexarUrl" class = "indexar" th:href="@{http://localhost:8080/indexarUrl}">Indexar Url</a>
+        <div th:if="${loggedIn}">
+
+            <button href="/logout" class="indexar" id="logbtt" th:text="${loggedIn}" >LogOut</button>
+        </div>
+        <div th:unless="${loggedIn}">
+            <a href="/login" class="indexar">Login</a>
+        </div>
+        <a href="indexarUrl" class="indexar" th:href="@{http://localhost:8080/indexarUrl}">Indexar Url</a>
+
     </div>
     <div id="logo"></div>
     <form id="search-form" th:action="@{/search}" method="post">

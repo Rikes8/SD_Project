@@ -119,11 +119,13 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
     }
 
 
-    public String ShareInfoToServer(int id, String s) throws RemoteException {
+    public ArrayList<String> ShareInfoToServer(int id, String s) throws RemoteException {
         String message = "";
         String username = "";
         String password = "";
         String send = "";
+        ArrayList<String> auxiliar = new ArrayList<>();
+
 
         //split input by " "
         String[] str= s.split(" ");
@@ -149,7 +151,8 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
             }
 
             //to return (client gets this message)
-            message = "link indexado!";
+            //message = "link indexado!";
+            auxiliar.add("link indexado!");
 
         }else if(str[0].equals("search") || str[0].equals("conn") || str[0].equals("statsv2")|| str[0].equals("plus")){
 
@@ -170,10 +173,12 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
             //send message to active barrels in sequence
             if (counter < barrels.size()){
                 message = barrels.get(counter).ShareInfoToBarrel(mm);
+                auxiliar.add(message);
                 counter++;
             }else{
                 counter = 0;
                 message = barrels.get(counter).ShareInfoToBarrel(mm);
+                auxiliar.add(message);
                 counter ++;
             }
 
@@ -225,17 +230,20 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
             statistics.remove(id);
 
         } else if (str[0].equals("register")) {
+
+            System.out.println("entrei\n");
+
             username = str[1];
             password = str[2];
             send = "register" + " " + username + " " + password + " "+ client_id;
 
             //send to barrel the username + password to regist
             if (counter < barrels.size()){
-                message = barrels.get(counter).ShareInfoToBarrel(send);
+                auxiliar.add(barrels.get(counter).ShareInfoToBarrel(send));
                 counter++;
             }else{
                 counter = 0;
-                message = barrels.get(counter).ShareInfoToBarrel(send);
+                auxiliar.add(barrels.get(counter).ShareInfoToBarrel(send));
                 counter ++;
             }
 
@@ -246,17 +254,17 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
 
             //send to barrel the username + password to do loggin
             if (counter < barrels.size()){
-                message = barrels.get(counter).ShareInfoToBarrel(send);
+                auxiliar.add(barrels.get(counter).ShareInfoToBarrel(send));
                 counter++;
             }else{
                 counter = 0;
-                message = barrels.get(counter).ShareInfoToBarrel(send);
+                auxiliar.add(barrels.get(counter).ShareInfoToBarrel(send));
                 counter ++;
             }
         }
 
         //return of message ->sent to client
-        return message;
+        return auxiliar;
     }
 
 
