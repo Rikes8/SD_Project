@@ -20,6 +20,23 @@
 
 
     <style>
+        .tudo {
+            position: fixed;
+            top: 0;
+            right: 0;
+            flex-direction: row;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        .voltar{
+            padding:15px;
+            text-decoration: none;
+            color: blue;
+
+        }
+
+
         .bd-placeholder-img {
             font-size: 1.125rem;
             text-anchor: middle;
@@ -93,28 +110,65 @@
         }
     </style>
 
+
+
 </head>
+
+<div class = "tudo">
+    <a href="homepage" class = "voltar">Voltar</a>
+</div>
 
 <main class="container">
     <div>
-
+        <h1>Resultados de pesquisa</h1>
     </div>
 
-    <div th:each = "item : ${array}">
-        <div class="my-3 p-3 bg-body rounded shadow-sm">
-            <h2 class="border-bottom pb-2 mb-0">Resultados da pesquisa</h2>
-            <div class="d-flex text-body-secondary pt-3">
-                <svg class="bd-placeholder-img flex-shrink-0 me-2 rounded" width="32" height="32" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 32x32" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#007bff"/><text x="50%" y="50%" fill="#007bff" dy=".3em">32x32</text></svg>
-                <div class="pb-3 mb-0 small lh-sm border-bottom w-100">
-                    <div class="d-flex justify-content-between">
-                        <strong class="text-gray-dark">Full Name</strong>
-                        <a href="#">Follow</a>
+
+
+    <div class="list-group">
+        <ul>
+            <li th:each = "url : ${array}">
+                <a href="#" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1" th:text = "${url[0]}"></h5>
+
                     </div>
-                    <span class="d-block">@username</span>
-                </div>
-            </div>
-        </div>
+                    <p class="mb-1" th:text = "${url[1]}"></p>
+                    <small class="text-body-secondary" th:text = "${url[2]}"></small>
+                </a>
+            </li>
+        </ul>
     </div>
+
+    <script>
+        function returnPage(page) {
+            console.log("Selected page: " + page);
+        }
+    </script>
+
+    <nav aria-label="...">
+        <ul class="pagination pagination-sm" >
+            <li th:each = "pag, status:${#numbers.sequence(1,paginas)} " class="page-item active" aria-current="page">
+                <a class="page-link"   th:text="${pag}" th:href="'search?input='+ ${input} +'&pag=' + ${pag}"></a>
+            </li>
+
+
+
+
+
+            <!--
+            <a class="page-link" href="#" th:text="${pag}"  th:onclick="'returnPage(' + ${pag} + '); return false;'" ></a>
+            <span class="page-link" th:text = "${pag}"></span>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            -->
+
+        </ul>
+    </nav>
+
+
+
+
 
 
 </main>

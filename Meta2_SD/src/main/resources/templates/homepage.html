@@ -4,11 +4,22 @@
     <title>Googol</title>
 
     <style>
-        .tudo{
-            text-align: right;
-            margin: auto auto auto;
+        .tudo {
+            position: fixed;
+            top: 0;
+            right: 0;
+            flex-direction: row;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        .indexar{
+            padding:15px;
+            text-decoration: none;
+            color: blue;
 
         }
+
         #search-form {
             justify-content: center;
             width: 50%;
@@ -25,7 +36,7 @@
         }
         #search-button {
             width: 30%;
-            background-color: lightblue;
+            background-color: blue;
             color: white;
             padding: 14px 25px;
             margin: 12px 0;
@@ -35,7 +46,7 @@
         }
         #index-button {
             width: 30%;
-            background-color: lightblue;
+            background-color: blue;
             color: white;
             padding: 14px 25px;
             margin: 12px 0;
@@ -50,6 +61,21 @@
         #search-button:hover {
             background-color:lightskyblue;
         }
+
+        #info{
+            justify-content: center;
+            border-bottom: 1px solid #ccc;
+            border-top: 1px solid #ccc;
+            bottom: 0;
+            position: fixed;
+            width: 100%;
+            background-color: #f9f9f9;
+            padding: 10px;
+            text-align: center;
+        }
+        p{
+            text-align: center;
+        }
         #logo {
             margin: 80px auto auto;
             width: 640px;
@@ -61,23 +87,31 @@
     </style>
 </head>
 <body>
-    <div class = "tudo">
-        <div th:if="${loggedIn}">
-
-            <button href="/logout" class="indexar" id="logbtt" th:text="${loggedIn}" >LogOut</button>
-        </div>
-        <div th:unless="${loggedIn}">
-            <a href="/login" class="indexar">Login</a>
-        </div>
-        <a href="indexarUrl" class="indexar" th:href="@{http://localhost:8080/indexarUrl}">Indexar Url</a>
-
+<div class = "tudo">
+    <div th:if="${loggedIn}">
+        <button href="/logout" class="indexar" id="logbtt" th:text="${loggedIn}" >LogOut</button>
     </div>
-    <div id="logo"></div>
-    <form id="search-form" th:action="@{/search}" method="post">
-        <input type="text" id="search-box" name="q" />
-        <button type="submit" id="search-button">Pesquisa Googol</button>
-        <input type="button" id = "index-button" onclick="location.href='http://localhost:8080/index.html';" value="Sinto-me com sorte" />
-    </form>
+    <div th:unless="${loggedIn}">
+        <a href="/login" class="indexar">Login</a>
+    </div>
+    <a href="indexarUrl" class="indexar" th:href="@{http://localhost:8080/indexarUrl}">Indexar Url</a>
+    <a href="links" class="indexar" th:href="@{http://localhost:8080/links}">Links apontados</a>
+</div>
+<div id="logo"></div>
+<form id="search-form" th:action="@{/search}"  method="get">
+    <input type="text" id="search-box"  th:value="${input}" name="input" required/>
+    <button type="submit" id="search-button">Pesquisa Googol</button>
+    <input type="button" id = "index-button" onclick="location.href='http://localhost:8080/HackerNews';" value="HackerNews" />
+</form>
+
+<div id = "info">
+    <p> Trabalho realizado para a Cadeira de Sistemas Distribuidos</p>
+    <p>
+        Universidade de Coimbra
+    </p>
+</div>
+
+
 
 </body>
 </html>

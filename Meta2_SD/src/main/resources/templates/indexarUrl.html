@@ -5,8 +5,19 @@
 
   <style>
     .tudo{
-      text-align: right;
-      margin: auto auto auto;
+      position: fixed;
+      top: 0;
+      right: 0;
+      flex-direction: row;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+
+    }
+    .voltar{
+      padding:15px;
+      text-decoration: none;
+      color: blue;
 
     }
     #search-form {
@@ -23,19 +34,10 @@
       border: 2px solid #ccc;
       border-radius: 20px;
     }
-    #search-button {
-      width: 30%;
-      background-color: lightblue;
-      color: white;
-      padding: 14px 25px;
-      margin: 12px 0;
-      border: none;
-      border-radius: 20px;
-      cursor: pointer;
-    }
+
     #index-button {
       width: 30%;
-      background-color: lightblue;
+      background-color: blue;
       color: white;
       padding: 14px 25px;
       margin: 12px 0;
@@ -46,9 +48,26 @@
     #index-button:hover {
       background-color: lightskyblue;
     }
-
-    #search-button:hover {
-      background-color:lightskyblue;
+    #info{
+      justify-content: center;
+      border-bottom: 1px solid #ccc;
+      border-top: 1px solid #ccc;
+      bottom: 0;
+      position: fixed;
+      width: 100%;
+      background-color: #f9f9f9;
+      padding: 10px;
+      text-align: center;
+    }
+    p{
+      text-align: center;
+    }
+    #mensagem{
+      font-family: "Times New Roman",math;
+      text-align: center;
+      text-decoration-color:lightblue;
+      text-justify: newspaper;
+      top:0;
     }
     #logo {
       margin: 80px auto auto;
@@ -62,15 +81,21 @@
 </head>
 <body>
 
-  <div class = "tudo">
-    <a href="homepage" class = "indexar">Voltar</a>
-  </div>
-  <div id="logo"></div>
+<div class = "tudo">
+  <a href="homepage" class = "voltar">Voltar</a>
+</div>
+<div id="logo"></div>
 
-  <form id="search-form" th:action="@{/indexarUrl}" method="post">
-    <input type="text" id="search-box" th:value="${input}" name="input" />
-    <button type="submit" id="search-button">Indexar Url</button>
-  </form>
-
+<form id="search-form" th:action="@{/indexarUrl}" method="post">
+  <input type="text" id="search-box" th:value="${input}" name="input" required />
+  <button type="submit" id="index-button">Indexar Url</button>
+  <p id = "mensagem" th:text="${mensagem}" />
+</form>
+<div id = "info">
+  <p> Trabalho realizado para a Cadeira de Sistemas Distruidos</p>
+  <p>
+    Universidade de Coimbra
+  </p>
+</div>
 </body>
 </html>

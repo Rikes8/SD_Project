@@ -154,7 +154,7 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
             //message = "link indexado!";
             auxiliar.add("link indexado!");
 
-        }else if(str[0].equals("search") || str[0].equals("conn") || str[0].equals("statsv2")|| str[0].equals("plus")){
+        }else if(str[0].equals("search") || str[0].equals("pag")|| str[0].equals("conn") || str[0].equals("statsv2")){
 
             /*if (str[0].equals("conn")){
                 for (Map.Entry<Integer, String> entry : IpClients.entrySet()) {
@@ -163,7 +163,9 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
                     }
                 }
             }*/
-            //FIXME: falta verificar se logado
+            //System.out.println("--->"+str[1]);
+
+            ArrayList<String> alllinks = new ArrayList<>();
 
             String mm = "";
             for (String value : str) {
@@ -172,15 +174,93 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
 
             //send message to active barrels in sequence
             if (counter < barrels.size()){
-                message = barrels.get(counter).ShareInfoToBarrel(mm);
-                auxiliar.add(message);
+                alllinks = barrels.get(counter).ShareInfoToBarrel(mm);
                 counter++;
             }else{
                 counter = 0;
-                message = barrels.get(counter).ShareInfoToBarrel(mm);
-                auxiliar.add(message);
+                alllinks = barrels.get(counter).ShareInfoToBarrel(mm);
                 counter ++;
             }
+
+            int pag_aux = (alllinks.size()/30)%10;
+            int paginas = 1;
+
+            if(alllinks.size()/30 >= 1){
+                paginas += alllinks.size()/30;
+            }else {
+                paginas = 1;
+            }
+
+            System.out.println(paginas);
+            System.out.println(alllinks.size());
+
+
+            if(str[0].equals("conn")){
+
+
+                for (int i = 0; i < alllinks.size(); i++){
+                    auxiliar.add(alllinks.get(i));
+                }
+
+            }
+
+            int num_pg;
+            if(str[0].equals("search")){
+
+                //alerta!!!
+                int sizei = 0;
+                if(30 > alllinks.size()){
+                    sizei = alllinks.size();
+                }else {
+                    sizei = 30;
+                }
+
+                for (int i = 0; i < sizei; i++){
+                    auxiliar.add(alllinks.get(i));
+                }
+                if(paginas > 1){
+
+                    auxiliar.add("More " + paginas + " pages!\n");
+                }
+                auxiliar.add(Integer.toString(paginas));
+            }
+
+
+            int size= 0;
+            if (str[0].equals("pag")){
+                int pg = Integer.parseInt(str[1]) - 1 ;
+
+                System.out.println("pg:"+ pg);
+
+                if ((pg*10*3)+(10 *3) <= alllinks.size()){
+                    size = (pg*10*3)+(10 *3);
+                }else{
+                    size = alllinks.size();
+                }
+
+                for (int i = pg*10*3; i < size; i++){
+                    auxiliar.add(alllinks.get(i));
+                }
+
+                System.out.println(paginas +"  " + pg);
+
+                if(paginas == pg){
+
+                    auxiliar.add("No more  pages!\n");
+                }else{
+
+                    auxiliar.add( paginas + " pages!\n");
+                }
+                auxiliar.add(Integer.toString(paginas));
+            }
+
+            if (str[0].equals("statsv2")){
+                auxiliar.add("TOP 10 pesquisas mais comuns");
+                for (int i = 0; i < alllinks.size(); i++){
+                    auxiliar.add(alllinks.get(i));
+                }
+            }
+
 
         }else if(str[0].equals("stats")){
 
@@ -231,7 +311,6 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
 
         } else if (str[0].equals("register")) {
 
-            System.out.println("entrei\n");
 
             username = str[1];
             password = str[2];
@@ -239,11 +318,12 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
 
             //send to barrel the username + password to regist
             if (counter < barrels.size()){
-                auxiliar.add(barrels.get(counter).ShareInfoToBarrel(send));
+
+                auxiliar = barrels.get(counter).ShareInfoToBarrel(send);
                 counter++;
             }else{
                 counter = 0;
-                auxiliar.add(barrels.get(counter).ShareInfoToBarrel(send));
+                auxiliar = barrels.get(counter).ShareInfoToBarrel(send);
                 counter ++;
             }
 
@@ -254,11 +334,11 @@ public class SearchModule extends UnicastRemoteObject implements ServerInterface
 
             //send to barrel the username + password to do loggin
             if (counter < barrels.size()){
-                auxiliar.add(barrels.get(counter).ShareInfoToBarrel(send));
+                auxiliar = barrels.get(counter).ShareInfoToBarrel(send);
                 counter++;
             }else{
                 counter = 0;
-                auxiliar.add(barrels.get(counter).ShareInfoToBarrel(send));
+                auxiliar = barrels.get(counter).ShareInfoToBarrel(send);
                 counter ++;
             }
         }

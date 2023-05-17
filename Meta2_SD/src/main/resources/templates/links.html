@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Googol</title>
+
+  <style>
+    .tudo{
+      position: fixed;
+      top: 0;
+      right: 0;
+      flex-direction: row;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+
+    }
+    .voltar{
+      padding:15px;
+      text-decoration: none;
+      color: blue;
+
+    }
+    #search-form {
+      justify-content: center;
+      width: 50%;
+      text-align: center;
+      margin: 0 auto auto;
+    }
+    #search-box {
+      width: 70%;
+      padding: 12px 20px;
+      margin: auto auto;
+      box-sizing: border-box;
+      border: 2px solid #ccc;
+      border-radius: 20px;
+    }
+
+    #index-button {
+      width: 30%;
+      background-color: blue;
+      color: white;
+      padding: 14px 25px;
+      margin: 12px 0;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+    #index-button:hover {
+      background-color: lightskyblue;
+    }
+    #info{
+      justify-content: center;
+      border-bottom: 1px solid #ccc;
+      border-top: 1px solid #ccc;
+      bottom: 0;
+      position: fixed;
+      width: 100%;
+      background-color: #f9f9f9;
+      padding: 10px;
+      text-align: center;
+    }
+    p{
+      text-align: center;
+    }
+    #mensagem{
+      font-family: "Times New Roman",math;
+      text-align: center;
+      text-decoration-color:lightblue;
+      text-justify: newspaper;
+      top:0;
+    }
+    #logo {
+      margin: 80px auto auto;
+      width: 640px;
+      height: 250px;
+      justify-content: flex-start;
+      background-size: contain;
+      background: url('https://miro.medium.com/v2/resize:fit:786/format:webp/1*OYAMq-mnojvgn2zyJEcf2g.jpeg') no-repeat center;
+    }
+  </style>
+</head>
+<body>
+
+<div class = "tudo">
+  <a href="homepage" class = "voltar">Voltar</a>
+</div>
+<div id="logo"></div>
+
+<form id="search-form" th:action="@{/linksapt}" method="get">
+  <input type="text" id="search-box" th:value="${input}" name="input" required/>
+  <button type="submit" id="index-button">Pesquisar Ligações</button>
+  <p id = "mensagem" th:text="${mensagem}" />
+</form>
+<div id = "info">
+  <p> Trabalho realizado para a Cadeira de Sistemas Distruidos</p>
+  <p>
+    Universidade de Coimbra
+  </p>
+</div>
+</body>
+</html>

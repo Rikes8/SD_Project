@@ -14,31 +14,47 @@ import org.springframework.web.servlet.function.EntityResponse;
 
 import java.rmi.RemoteException;
 
+/**
+ * Class responsavel pela homepage, rediricionamento do URL raiz para a homepage e login.
+ */
 @Controller
 public class GreetingController {
 
-
+    /**
+     * metodo que faz o mapeamento da pagina raiz e redireciona para a homepage
+     * @return pagina homepage
+     */
     @GetMapping("/")
     public String redirect() {
         return "redirect:/homepage";
     }
 
+    /**
+     * metodo que faz o mapeamento da pagina homepage
+     * @param model
+     * @return pagina homepage
+     */
 	@GetMapping("/homepage")
 	public String greeting(Model model) {
 		return "homepage";
 	}
-
-    @GetMapping("/search2")
-    public String homepage(Model model){
-        return redirect();
+    /**
+     * metodo que faz o mapeamento da pagina links
+     * @param model
+     * @return pagina links
+     */
+    @GetMapping("/links")
+    public String links(Model model){
+        return "links";
     }
 
-
-
-
-
-
-
-
-
+    /***
+     * metodo que faz o mapeamento da pagina login
+     * @param model
+     * @return pagina login
+     */
+    @GetMapping("/login")
+    public String login(Model model){
+        return "login";
+    }
 }

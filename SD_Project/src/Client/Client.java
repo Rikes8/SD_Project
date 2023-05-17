@@ -4,6 +4,8 @@ import java.rmi.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.*;
 import java.io.*;
+import java.util.ArrayList;
+
 import src.SearchModule.ServerInterface;
 
 public class Client extends UnicastRemoteObject implements ClientInterface {
@@ -57,10 +59,27 @@ public class Client extends UnicastRemoteObject implements ClientInterface {
             });
 
             while (true) {
-                System.out.print("> ");
+                System.out.print("\n> ");
                 ClientInput = reader.readLine();
                 //send client input by RMI Callback and print what is returned
-                System.out.println(h.ShareInfoToServer(c.id, ClientInput));
+
+                ArrayList<String> print = new ArrayList<>();
+                print = h.ShareInfoToServer(c.id, ClientInput);
+
+                int counter = 0;
+                for (int i = 0; i < print.size(); i++){
+                    System.out.println();
+                    if (counter == 0){
+                        System.out.print(print.get(i));
+                        counter++;
+                    }else if (counter == 1){
+                        System.out.print(print.get(i));
+                        counter++;
+                    }else if (counter == 2){
+                        System.out.print(print.get(i));
+                        counter=0;
+                    }
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

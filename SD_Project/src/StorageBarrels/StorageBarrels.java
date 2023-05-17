@@ -34,6 +34,8 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
 
     LinkedBlockingQueue<Url> repetidos = new LinkedBlockingQueue<>();
 
+    private static HashMap<String, Integer> words_searched = new HashMap<>();
+
 
     public StorageBarrels() throws RemoteException {
         super();
@@ -41,8 +43,8 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
     }
 
     //RMI Callback -> Input from client and requires information from barrel
-    public String ShareInfoToBarrel(String s) throws RemoteException {
-
+    public ArrayList<String> ShareInfoToBarrel(String s) throws RemoteException {
+        ArrayList<String> aux_str = new ArrayList<>();
 
         String message ="";
         String[] str= s.split(" ");
@@ -77,7 +79,8 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
 
                 oos.close();
                 in.close();
-                return "Client Registed";
+                aux_str.add("Client Registed");
+                return aux_str;
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
             } catch (IOException e) {
@@ -111,13 +114,14 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
 
                     if (usr.getName().equals(str[1]) && usr.getPassword().equals(str[2])){
                         users.clear();
-                        return "Client Logged";
+                        aux_str.add("Client Logged");
+                        return aux_str;
 
                     }
                 }
 
-
-                return "Wrong Client Credential";
+                aux_str.add("Wrong Client Credential");
+                return aux_str;
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
             } catch (IOException e) {
@@ -129,9 +133,47 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
             //gets the links that are in commun with the works inputed
             LinkedBlockingQueue<Url> to_delete = new LinkedBlockingQueue<>();
 
+            String file_r2 = "src/StorageBarrels/wordscount.obj";
+            try {
+                FileOutputStream fosr2 = new FileOutputStream(file_r2);
+                ObjectOutputStream oosr2 = new ObjectOutputStream(fosr2);
 
-            //System.out.println(index);
-            //System.out.println("print");
+                FileInputStream finr2 = new FileInputStream(file_r2);
+                ObjectInputStream inr2 = new ObjectInputStream(finr2);
+
+                if (file_r2.length() != 0) {
+                    while (true) {
+                        try {
+                            HashMap<String, Integer> inrl2 = (HashMap<String, Integer>) inr2.readObject();
+                            words_searched.putAll(inrl2);
+                        } catch (Exception e) {
+                            break; // eof
+                        }
+                    }
+                }
+
+                oosr2.writeObject(words_searched);
+
+                oosr2.close();
+                inr2.close();
+
+                for(int j = 1; j < str.length ; j++){
+                    if (words_searched.containsKey(str[j])){
+                        int value = words_searched.get(str[j]);
+                        words_searched.put(str[j], value +1);
+                    }else {
+                        words_searched.put(str[j], 1);
+                    }
+                }
+
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+
+
 
             for (int j = 1; j < str.length; j++){
 
@@ -184,17 +226,31 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
 
 
 
-
+            /*
             int count_rep = 0;
             for (Url u:repetidos) {
                 if (count_rep >= 9){
-                    message = message + "\nWrite \"plus\" for more!\n";
-                    return message;
+                    //message = message + "\nWrite \"plus\" for more!\n";
+                    aux_str.add("\nWrite \"plus\" for more!\n");
+
+                    return aux_str;
                 }
                 message = message + u.getName() +"\n" + u.getTitle() + "\n" + u.getQuote() + "\n\n";
-                u.setTotalTargetUrls(u.getTotalTargetUrls() +1);
+                aux_str.add(u.getName());
+                aux_str.add(u.getTitle());
+                aux_str.add(u.getQuote());
+
+
                 repetidos.remove(u);
                 count_rep++;
+            }*/
+
+            for (Url u: repetidos){
+                aux_str.add(u.getName());
+                aux_str.add(u.getTitle());
+                aux_str.add(u.getQuote());
+                u.setTotalTargetUrls(u.getTotalTargetUrls() +1);
+                //repetidos.remove(u);
             }
 
 
@@ -203,86 +259,109 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
 
 
         }else if(str[0].equals("conn")){
-
+            System.out.println("entrei1");
 
             for (Map.Entry<String, ArrayList<String>> entry : index_apontados_cpy.entrySet()) {
                 String url = entry.getKey();
 
                 if (url.equalsIgnoreCase(str[1])){
-
+                    System.out.println("entrei2");
                     for (String url_h : entry.getValue()){
                         message = message + url_h + "\n";
+                        aux_str.add(url_h);
                     }
                     break;
                 }
 
             }
-            message = message + "\n";
-            return message;
+            //message = message + "\n";
+            return aux_str;
 
         }else if(str[0].equals("statsv2")) {
+            String file_r = "src/StorageBarrels/wordscount.obj";
+            try {
+                FileOutputStream fosr = new FileOutputStream(file_r);
+                ObjectOutputStream oosr = new ObjectOutputStream(fosr);
 
-            int count = 10;
-            int size = 10;
-            int size_aux = 1;
-            int aux = 0;
-            int helper = 0;
-            HashMap<Integer,Url> num = new HashMap<>();
-            for (Url url_count : index_apontados.keySet()) {
-                    size_aux --;
-                    if (size != 0){
-                        num.put(url_count.getTotalTargetUrls(),url_count);
-                        size --;
-                    }else{
-                        for (Integer key : num.keySet()){
+                FileInputStream finr = new FileInputStream(file_r);
+                ObjectInputStream inr = new ObjectInputStream(finr);
 
-                            if(size_aux == 0){
-                                helper = key;
-                                size_aux ++;
-                            }
+                if (file_r.length() != 0) {
+                    while (true) {
+                        try {
+                            HashMap<String, Integer> inrl = (HashMap<String, Integer>) inr.readObject();
+                            words_searched.putAll(inrl);
+                        } catch (Exception e) {
+                            break; // eof
                         }
-                        num.remove(helper);
-                        num.put(url_count.getTotalTargetUrls(),url_count);
+                    }
+                }
 
+                oosr.writeObject(words_searched);
+
+                oosr.close();
+                inr.close();
+
+                HashMap<String,Integer> aux = words_searched;
+
+                for(int j = 0; j < 10; j++){
+                    int max = 0;
+                    int index = 0;
+                    String key="";
+                    for (Map.Entry<String, Integer> entry : aux.entrySet()) {
+                        if (entry.getValue() > max && !aux_str.contains(entry.getKey())) {
+                            max = entry.getValue();
+                            key = entry.getKey();
+                        }
                     }
 
-                    ArrayList<Integer> sort = new ArrayList<Integer>(num.keySet());
-                    Collections.sort(sort);
-
-            }
-
-            for ( HashMap.Entry<Integer, Url> entry : num.entrySet()) {
-                if(count != 0){
-                    message = message + entry.getValue().getName() +"\n";
-                }else{
-                    message = message +"\n";
-                    break;
+                    if (!aux_str.contains(key)){
+                        aux_str.add(key);
+                    }
                 }
+
+                return aux_str;
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
 
-            return message;
-
-        }else if(str[0].equals("plus")){
+        }else if(str[0].equals("pag")){
             //System.out.println("entrei");
+            /*
             int count_rep_2 = 0;
             for (Url u:repetidos) {
                 if (count_rep_2 > 9){
-                    return "press space for more!";
+                    aux_str.add("press plus for more");
+                    return aux_str;
                 }
-                message = message + u.getName() +"\n" + u.getTitle() + "\n" + u.getQuote() + "\n\n";
+                //message = message + u.getName() +"\n" + u.getTitle() + "\n" + u.getQuote() + "\n\n";
+                aux_str.add(u.getName());
+                aux_str.add(u.getTitle());
+                aux_str.add(u.getQuote());
+
                 u.setTotalTargetUrls(u.getTotalTargetUrls() +1);
                 repetidos.remove(u);
                 count_rep_2++;
+            }*/
+
+            for (Url u: repetidos){
+                aux_str.add(u.getName());
+                aux_str.add(u.getTitle());
+                aux_str.add(u.getQuote());
+                u.setTotalTargetUrls(u.getTotalTargetUrls() +1);
+                //repetidos.remove(u);
             }
 
-            return message;
+            return aux_str;
 
         }
 
 
 
-
-        return "Command not found: " + str[0];
+        //aux_str.add("Command not found");
+        return aux_str;
     }
 
     public static void main(String args[]) throws IOException, NotBoundException, ServerNotActiveException {
@@ -302,6 +381,32 @@ public class StorageBarrels extends  UnicastRemoteObject implements BarrelsInter
         InetAddress group = InetAddress.getByName(MULTICAST_ADDRESS);
         multicast_socket.joinGroup(group);
 
+        /*
+        String file23_aux = "src/StorageBarrels/wordscount.obj";
+        File file2_23 = new File(file23_aux);
+        if(!file2_23.exists()){
+            file2_23.createNewFile();
+        }
+        try {
+            if (file2_23.length() != 0) {
+
+                FileInputStream fin223 = new FileInputStream(file2_23);
+                ObjectInputStream in223 = new ObjectInputStream(fin223);
+                System.out.println("entrei");
+                while (true) {
+                    try {
+                        words_searched = (HashMap<String,Integer>) in223.readObject();
+
+                    } catch (Exception e) {
+                        break; // eof
+                    }
+                }
+                in223.close();
+            }
+
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }*/
 
 
         String file2_aux = "src/StorageBarrels/index_apontados_cpy.obj";

@@ -13,7 +13,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 
-
+/**
+ * Class principal da aplicação
+ */
 @SpringBootApplication
 public class DemoApplication {
 
@@ -22,6 +24,11 @@ public class DemoApplication {
 		SpringApplication.run(DemoApplication.class, args);
 	}
 
+	/**
+	 * metodo que retorna uma referencia do SearchModule
+	 * @return Referencia WebServerRMI
+	 * @throws RemoteException
+	 */
 	@Bean
 	public WebServerRMI server() throws RemoteException {
 		return new WebServerRMI();
